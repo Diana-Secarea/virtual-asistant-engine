@@ -100,9 +100,9 @@ To contribute or modify the project:
 
 This project is open source and available under the MIT License.
 
-## Contributing
+## Multimedia Project
 
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
+Ownership of Diana Secarea and Estera Smeu. We do accept contributions but do not tell our teacher about it :)
 
 ## Support
 
