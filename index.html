@@ -13,7 +13,7 @@
 
         body {
             height: 100vh;
-            background: linear-gradient(135deg, #000000 0%, #FF0000 50%, #000000 100%);
+            background: linear-gradient(135deg, #000000 0%, #8c0a22 50%, #000000 100%);
             font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: center;
@@ -29,6 +29,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            z-index: 1;
         }
 
         .star {
@@ -61,29 +62,444 @@
             }
         }
 
-        .container {
-            text-align: center;
-            color: white;
-            z-index: 1;
+        .page {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
         }
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        .page.active {
+            display: flex;
+            flex-direction: column;
         }
 
-        p {
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+        }
+
+        .login-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: #8B0000;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
             font-size: 1.2rem;
-            opacity: 0.9;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .icon-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .main-title {
+            font-size: 8rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            letter-spacing: -5px;
+        }
+
+        .subtitle {
+            font-size: 2.5rem;
+            margin-top: -20px;
+        }
+
+        .start-btn {
+            background: white;
+            color: #8B0000;
+            border: none;
+            padding: 20px 60px;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .features-section {
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .features-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .scroll-indicator {
+            width: 60px;
+            height: 60px;
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid white;
+        }
+
+        /* Features Page */
+        .features-list {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-page-title {
+            font-size: 3.5rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            color: white;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            font-size: 1.5rem;
+            text-align: left;
+        }
+
+        /* Auth Pages */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            gap: 40px;
+        }
+
+        .user-icon-large {
+            width: 150px;
+            height: 150px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .auth-title {
+            font-size: 3rem;
+            margin-top: -10px;
+        }
+
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .auth-btn {
+            background: transparent;
+            color: white;
+            border: 3px solid white;
+            padding: 15px 80px;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 250px;
+        }
+
+        .auth-btn:hover {
+            background: white;
+            color: #8B0000;
+            transform: scale(1.05);
+        }
+
+        .continue-link {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .continue-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Form Pages */
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            gap: 30px;
+        }
+
+        .form-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 400px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-label {
+            font-size: 1.3rem;
+            min-width: 150px;
+            text-align: right;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+        }
+
+        .form-input:focus {
+            outline: 2px solid white;
+        }
+
+        .next-btn {
+            background: transparent;
+            color: white;
+            border: 3px solid white;
+            padding: 12px 50px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+
+        .next-btn:hover {
+            background: white;
+            color: #8B0000;
+        }
+
+        .forgot-password {
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: right;
+            margin-top: -10px;
+            text-decoration: none;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="stars" id="stars"></div>
-    <div class="container">
-        <h1>Virtual Assistant Engine</h1>
-        <p>Your loved voice assistant</p>
+
+    <!-- Home Page -->
+    <div class="page active" id="homePage">
+        <div class="navbar">
+            <button class="login-btn" onclick="showPage('authPage')">
+                <span>👤</span>
+                <span>login</span>
+            </button>
+            <div class="icon-buttons">
+                <button class="icon-btn" title="Voice Recognition">🎙️</button>
+                <button class="icon-btn" title="Reminders">⏰</button>
+                <button class="icon-btn" title="Questions">❓</button>
+                <button class="icon-btn" title="Music Player">🎧</button>
+            </div>
+        </div>
+        <div class="main-content">
+            <h1 class="main-title">Hello!</h1>
+            <p class="subtitle">How can I help you?</p>
+            <button class="start-btn" onclick="showPage('featuresPage')">press here to start</button>
+            <div class="features-section">
+                <p class="features-title">voice recognition assistant</p>
+                <p class="features-title">features</p>
+                <div class="scroll-indicator" onclick="showPage('featuresPage')">
+                    <div class="arrow-down"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Page -->
+    <div class="page" id="featuresPage">
+        <div class="main-content">
+            <h2 class="features-page-title">Voice recognition assistant features:</h2>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🎙️</div>
+                    <div class="feature-text">Voice Recognition - Speak commands naturally using your microphone</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">❓</div>
+                    <div class="feature-text">Get answers to various questions</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⏰</div>
+                    <div class="feature-text">Reminder System - Set and manage reminders with voice commands</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎧</div>
+                    <div class="feature-text">Music Player - Play music with voice commands</div>
+                </div>
+            </div>
+        </div>
+        <a class="continue-link" onclick="showPage('homePage')">← back</a>
+    </div>
+
+    <!-- Auth Selection Page -->
+    <div class="page" id="authPage">
+        <div class="auth-container">
+            <div class="user-icon-large">👤</div>
+            <div class="auth-buttons">
+                <button class="auth-btn" onclick="showPage('signUpPage')">sign up</button>
+                <button class="auth-btn" onclick="showPage('signInPage')">sign in</button>
+            </div>
+        </div>
+        <a class="continue-link" onclick="showPage('homePage')">continue without an account</a>
+    </div>
+
+    <!-- Sign Up Page -->
+    <div class="page" id="signUpPage">
+        <div class="form-container">
+            <div class="user-icon-large">👤</div>
+            <h2 class="auth-title">sign up</h2>
+            <form class="form-inputs" onsubmit="return false;">
+                <div class="form-row">
+                    <label class="form-label">user name</label>
+                    <input type="text" class="form-input" required>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" required>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">phone number</label>
+                    <input type="tel" class="form-input" required>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">password</label>
+                    <input type="password" class="form-input" required>
+                </div>
+                <button class="next-btn" onclick="alert('Sign up functionality coming soon!')">next</button>
+            </form>
+        </div>
+        <a class="continue-link" onclick="showPage('authPage')">continue without making an account</a>
+    </div>
+
+    <!-- Sign In Page -->
+    <div class="page" id="signInPage">
+        <div class="form-container">
+            <div class="user-icon-large">👤</div>
+            <h2 class="auth-title">sign in</h2>
+            <form class="form-inputs" onsubmit="return false;">
+                <div class="form-row">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" required>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">password</label>
+                    <input type="password" class="form-input" required>
+                </div>
+                <a href="#" class="forgot-password" style="text-align: right; width: 100%; display: block;">Forgot password?</a>
+                <button class="next-btn" onclick="alert('Sign in functionality coming soon!')">next</button>
+            </form>
+        </div>
+        <a class="continue-link" onclick="showPage('authPage')">continue without an account</a>
     </div>
 
     <script>
@@ -110,6 +526,17 @@
                 
                 starsContainer.appendChild(star);
             }
+        }
+
+        // Page navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
         }
         
         // Create stars when page loads
