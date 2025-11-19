@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Assistant Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -11,15 +14,40 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary-red: #8c0a22;
+            --primary-red-dark: #6a0819;
+            --primary-red-light: #a50d2d;
+            --accent-red: #ff1a4d;
+            --text-white: #ffffff;
+            --text-gray: rgba(255, 255, 255, 0.7);
+            --text-gray-light: rgba(255, 255, 255, 0.5);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.4);
+        }
+
         body {
             height: 100vh;
-            background: linear-gradient(135deg, #000000 0%, #8c0a22 50%, #000000 100%);
-            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a0a0f 20%, #8c0a22 50%, #1a0a0f 80%, #000000 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
             position: relative;
+            color: var(--text-white);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .stars {
@@ -30,13 +58,15 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            overflow: hidden;
         }
 
         .star {
             position: absolute;
-            background: white;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 70%, transparent 100%);
             border-radius: 50%;
-            animation: twinkle 2s infinite;
+            animation: twinkle 3s ease-in-out infinite;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
         }
 
         .star:nth-child(odd) {
@@ -51,10 +81,14 @@
             animation-delay: 1.5s;
         }
 
+        .star:nth-child(7n) {
+            animation-delay: 2s;
+        }
+
         @keyframes twinkle {
             0%, 100% {
-                opacity: 0.3;
-                transform: scale(1);
+                opacity: 0.2;
+                transform: scale(0.8);
             }
             50% {
                 opacity: 1;
@@ -70,60 +104,107 @@
             top: 0;
             left: 0;
             z-index: 2;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .page.active {
             display: flex;
             flex-direction: column;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
+            padding: 24px 48px;
+            backdrop-filter: blur(20px);
+            background: rgba(140, 10, 34, 0.15);
+            border-bottom: 1px solid rgba(140, 10, 34, 0.3);
+            position: relative;
+            z-index: 10;
         }
 
         .login-btn {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: white;
-            color: #8B0000;
+            gap: 12px;
+            background: var(--text-white);
+            color: var(--primary-red);
             border: none;
-            padding: 10px 25px;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            letter-spacing: -0.3px;
         }
 
         .login-btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: #f8f8f8;
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
         }
 
         .icon-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
         }
 
         .icon-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: white;
-            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(140, 10, 34, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(140, 10, 34, 0.4);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            transition: transform 0.2s;
+            font-size: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .icon-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
         }
 
         .icon-btn:hover {
-            transform: scale(1.1);
+            transform: translateY(-2px);
+            background: rgba(140, 10, 34, 0.4);
+            border-color: rgba(140, 10, 34, 0.6);
+            box-shadow: 0 4px 16px rgba(140, 10, 34, 0.4);
+        }
+
+        .icon-btn:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .icon-btn:active {
+            transform: translateY(0);
         }
 
         .main-content {
@@ -132,116 +213,231 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 30px;
-            color: white;
+            gap: 32px;
+            color: var(--text-white);
             text-align: center;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         .main-title {
-            font-size: 8rem;
-            font-weight: bold;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-            letter-spacing: -5px;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-white) 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.05em;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            animation: fadeInUp 0.8s ease;
         }
 
         .subtitle {
-            font-size: 2.5rem;
-            margin-top: -20px;
+            font-size: clamp(1.25rem, 2.5vw, 2rem);
+            font-weight: 400;
+            color: var(--text-gray);
+            letter-spacing: -0.02em;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .start-btn {
-            background: white;
-            color: #8B0000;
+            background: var(--text-white);
+            color: var(--primary-red);
             border: none;
-            padding: 20px 60px;
-            border-radius: 15px;
-            font-size: 1.5rem;
-            font-weight: bold;
+            padding: 18px 48px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 16px;
+            box-shadow: var(--shadow-lg);
+            letter-spacing: -0.3px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(140, 10, 34, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .start-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .start-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .start-btn:active {
+            transform: translateY(-1px);
         }
 
         .features-section {
             margin-top: 80px;
             text-align: center;
+            animation: fadeInUp 0.8s ease 0.6s both;
         }
 
         .features-title {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .scroll-indicator {
-            width: 60px;
-            height: 60px;
-            border: 3px solid white;
+            width: 56px;
+            height: 56px;
+            border: 2px solid rgba(140, 10, 34, 0.5);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
+            margin: 16px auto 0;
             cursor: pointer;
             animation: bounce 2s infinite;
+            background: rgba(140, 10, 34, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .scroll-indicator:hover {
+            border-color: rgba(140, 10, 34, 0.8);
+            background: rgba(140, 10, 34, 0.35);
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(140, 10, 34, 0.4);
         }
 
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
         }
 
         .arrow-down {
             width: 0;
             height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 20px solid white;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid var(--text-white);
+            opacity: 0.8;
         }
 
         /* Features Page */
         .features-list {
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            padding: 40px;
-            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 48px;
+            max-width: 1400px;
             margin: 0 auto;
+            width: 100%;
         }
 
         .features-page-title {
-            font-size: 3.5rem;
-            color: white;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 700;
+            color: var(--text-white);
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 64px;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--text-white) 0%, var(--text-gray) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .feature-item {
             display: flex;
-            align-items: center;
-            gap: 30px;
-            color: white;
+            align-items: flex-start;
+            gap: 24px;
+            color: var(--text-white);
+            padding: 32px;
+            background: rgba(140, 10, 34, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(140, 10, 34, 0.3);
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-red), var(--accent-red));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(140, 10, 34, 0.5);
+            border-color: rgba(140, 10, 34, 0.6);
+            background: rgba(140, 10, 34, 0.25);
+        }
+
+        .feature-item:hover::before {
+            transform: scaleX(1);
         }
 
         .feature-icon {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.75rem;
             flex-shrink: 0;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
         }
 
         .feature-text {
-            font-size: 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 400;
             text-align: left;
+            line-height: 1.6;
+            color: var(--text-white);
+            flex: 1;
         }
 
         /* Auth Pages */
@@ -251,63 +447,112 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: white;
-            gap: 40px;
+            color: var(--text-white);
+            gap: 48px;
+            padding: 40px;
         }
 
         .user-icon-large {
-            width: 150px;
-            height: 150px;
-            background: white;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: 3rem;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .user-icon-large::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
+            opacity: 0.3;
+            filter: blur(20px);
+            z-index: -1;
         }
 
         .auth-title {
-            font-size: 3rem;
-            margin-top: -10px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-top: -8px;
+            letter-spacing: -0.03em;
         }
 
         .auth-buttons {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
+            width: 100%;
+            max-width: 320px;
         }
 
         .auth-btn {
-            background: transparent;
-            color: white;
-            border: 3px solid white;
-            padding: 15px 80px;
-            border-radius: 15px;
-            font-size: 1.5rem;
-            font-weight: bold;
+            background: rgba(140, 10, 34, 0.2);
+            backdrop-filter: blur(20px);
+            color: var(--text-white);
+            border: 1px solid rgba(140, 10, 34, 0.4);
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            min-width: 250px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            letter-spacing: -0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
         }
 
         .auth-btn:hover {
-            background: white;
-            color: #8B0000;
-            transform: scale(1.05);
+            background: var(--text-white);
+            color: var(--primary-red);
+            border-color: var(--text-white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .auth-btn:hover::before {
+            left: 100%;
+        }
+
+        .auth-btn:active {
+            transform: translateY(0);
         }
 
         .continue-link {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            color: white;
-            font-size: 1.1rem;
+            bottom: 32px;
+            right: 48px;
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            font-weight: 500;
             cursor: pointer;
             text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
         }
 
         .continue-link:hover {
-            text-decoration: underline;
+            color: var(--text-white);
+            background: rgba(140, 10, 34, 0.2);
+            backdrop-filter: blur(10px);
         }
 
         /* Form Pages */
@@ -317,70 +562,197 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: white;
-            gap: 30px;
+            color: var(--text-white);
+            gap: 40px;
+            padding: 40px;
         }
 
         .form-inputs {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            width: 400px;
+            gap: 24px;
+            width: 100%;
+            max-width: 440px;
+            background: rgba(140, 10, 34, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(140, 10, 34, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 16px 64px rgba(140, 10, 34, 0.3);
         }
 
         .form-row {
             display: flex;
-            align-items: center;
-            gap: 15px;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .form-label {
-            font-size: 1.3rem;
-            min-width: 150px;
-            text-align: right;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .form-input {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-white);
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: var(--text-gray-light);
         }
 
         .form-input:focus {
-            outline: 2px solid white;
+            outline: none;
+            border-color: var(--primary-red);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(140, 10, 34, 0.2);
         }
 
         .next-btn {
-            background: transparent;
-            color: white;
-            border: 3px solid white;
-            padding: 12px 50px;
-            border-radius: 15px;
-            font-size: 1.3rem;
-            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
+            color: var(--text-white);
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.2s;
+            margin-top: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            letter-spacing: -0.3px;
+            width: 100%;
         }
 
         .next-btn:hover {
-            background: white;
-            color: #8B0000;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: linear-gradient(135deg, var(--primary-red-light), var(--accent-red));
+        }
+
+        .next-btn:active {
+            transform: translateY(0);
         }
 
         .forgot-password {
-            color: white;
-            font-size: 1rem;
+            color: var(--text-gray);
+            font-size: 0.875rem;
+            font-weight: 500;
             cursor: pointer;
             text-align: right;
-            margin-top: -10px;
+            margin-top: -8px;
             text-decoration: none;
+            transition: color 0.3s ease;
         }
 
         .forgot-password:hover {
+            color: var(--text-white);
             text-decoration: underline;
+        }
+
+        /* Voice Assistant Canvas Page */
+        .voice-assistant-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            padding: 40px;
+        }
+
+        .voice-canvas-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(140, 10, 34, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(140, 10, 34, 0.4);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 16px 64px rgba(140, 10, 34, 0.4);
+        }
+
+        #voiceCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+        }
+
+        .voice-title {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 32px;
+            text-align: center;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--text-white) 0%, var(--text-gray) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .voice-controls {
+            margin-top: 32px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .voice-btn {
+            background: rgba(140, 10, 34, 0.25);
+            backdrop-filter: blur(20px);
+            color: var(--text-white);
+            border: 1px solid rgba(140, 10, 34, 0.5);
+            padding: 14px 36px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: -0.3px;
+            box-shadow: 0 4px 16px rgba(140, 10, 34, 0.3);
+        }
+
+        .voice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(140, 10, 34, 0.5);
+            background: rgba(140, 10, 34, 0.4);
+            border-color: rgba(140, 10, 34, 0.7);
+        }
+
+        .voice-btn.active {
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
+            color: var(--text-white);
+            border-color: transparent;
+            animation: pulse 2s infinite;
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(140, 10, 34, 0.7), var(--shadow-lg);
+            }
+            50% {
+                box-shadow: 0 0 0 12px rgba(140, 10, 34, 0), var(--shadow-lg);
+            }
         }
     </style>
 </head>
@@ -391,23 +763,50 @@
     <div class="page active" id="homePage">
         <div class="navbar">
             <button class="login-btn" onclick="showPage('authPage')">
-                <span>👤</span>
-                <span>login</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Login</span>
             </button>
             <div class="icon-buttons">
-                <button class="icon-btn" title="Voice Recognition">🎙️</button>
-                <button class="icon-btn" title="Reminders">⏰</button>
-                <button class="icon-btn" title="Questions">❓</button>
-                <button class="icon-btn" title="Music Player">🎧</button>
+                <button class="icon-btn" title="Voice Recognition" onclick="showPage('voiceAssistantPage')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Reminders">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Questions">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Music Player">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18V5l12-2v13"></path>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                </button>
             </div>
         </div>
         <div class="main-content">
             <h1 class="main-title">Hello!</h1>
             <p class="subtitle">How can I help you?</p>
-            <button class="start-btn" onclick="showPage('featuresPage')">press here to start</button>
+            <button class="start-btn" onclick="showPage('featuresPage')">Get Started</button>
             <div class="features-section">
-                <p class="features-title">voice recognition assistant</p>
-                <p class="features-title">features</p>
+                <p class="features-title">Voice Recognition Assistant</p>
+                <p class="features-title" style="margin-top: 4px;">Features</p>
                 <div class="scroll-indicator" onclick="showPage('featuresPage')">
                     <div class="arrow-down"></div>
                 </div>
@@ -418,88 +817,120 @@
     <!-- Features Page -->
     <div class="page" id="featuresPage">
         <div class="main-content">
-            <h2 class="features-page-title">Voice recognition assistant features:</h2>
+            <h2 class="features-page-title">Voice Recognition Assistant Features</h2>
             <div class="features-list">
                 <div class="feature-item">
                     <div class="feature-icon">🎙️</div>
-                    <div class="feature-text">Voice Recognition - Speak commands naturally using your microphone</div>
+                    <div class="feature-text">Voice Recognition - Speak commands naturally using your microphone with advanced speech-to-text technology</div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">❓</div>
-                    <div class="feature-text">Get answers to various questions</div>
+                    <div class="feature-text">Intelligent Q&A - Get instant answers to various questions powered by AI</div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">⏰</div>
-                    <div class="feature-text">Reminder System - Set and manage reminders with voice commands</div>
+                    <div class="feature-text">Smart Reminders - Set and manage reminders with intuitive voice commands</div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🎧</div>
-                    <div class="feature-text">Music Player - Play music with voice commands</div>
+                    <div class="feature-text">Music Control - Play, pause, and control your music library with voice commands</div>
                 </div>
             </div>
         </div>
-        <a class="continue-link" onclick="showPage('homePage')">← back</a>
+        <a class="continue-link" onclick="showPage('homePage')">← Back</a>
     </div>
 
     <!-- Auth Selection Page -->
     <div class="page" id="authPage">
         <div class="auth-container">
-            <div class="user-icon-large">👤</div>
+            <div class="user-icon-large">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+            <h2 class="auth-title">Welcome</h2>
             <div class="auth-buttons">
-                <button class="auth-btn" onclick="showPage('signUpPage')">sign up</button>
-                <button class="auth-btn" onclick="showPage('signInPage')">sign in</button>
+                <button class="auth-btn" onclick="showPage('signUpPage')">Sign Up</button>
+                <button class="auth-btn" onclick="showPage('signInPage')">Sign In</button>
             </div>
         </div>
-        <a class="continue-link" onclick="showPage('homePage')">continue without an account</a>
+        <a class="continue-link" onclick="showPage('homePage')">Continue without an account</a>
     </div>
 
     <!-- Sign Up Page -->
     <div class="page" id="signUpPage">
         <div class="form-container">
-            <div class="user-icon-large">👤</div>
-            <h2 class="auth-title">sign up</h2>
+            <div class="user-icon-large">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+            </div>
+            <h2 class="auth-title">Create Account</h2>
             <form class="form-inputs" onsubmit="return false;">
                 <div class="form-row">
-                    <label class="form-label">user name</label>
-                    <input type="text" class="form-input" required>
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" placeholder="Enter your username" required>
                 </div>
                 <div class="form-row">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-input" required>
+                    <input type="email" class="form-input" placeholder="Enter your email" required>
                 </div>
                 <div class="form-row">
-                    <label class="form-label">phone number</label>
-                    <input type="tel" class="form-input" required>
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-input" placeholder="Enter your phone number" required>
                 </div>
                 <div class="form-row">
-                    <label class="form-label">password</label>
-                    <input type="password" class="form-input" required>
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" placeholder="Create a password" required>
                 </div>
-                <button class="next-btn" onclick="alert('Sign up functionality coming soon!')">next</button>
+                <button class="next-btn" onclick="alert('Sign up functionality coming soon!')">Create Account</button>
             </form>
         </div>
-        <a class="continue-link" onclick="showPage('authPage')">continue without making an account</a>
+        <a class="continue-link" onclick="showPage('authPage')">Continue without making an account</a>
     </div>
 
     <!-- Sign In Page -->
     <div class="page" id="signInPage">
         <div class="form-container">
-            <div class="user-icon-large">👤</div>
-            <h2 class="auth-title">sign in</h2>
+            <div class="user-icon-large">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+            <h2 class="auth-title">Welcome Back</h2>
             <form class="form-inputs" onsubmit="return false;">
                 <div class="form-row">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-input" required>
+                    <input type="email" class="form-input" placeholder="Enter your email" required>
                 </div>
                 <div class="form-row">
-                    <label class="form-label">password</label>
-                    <input type="password" class="form-input" required>
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" placeholder="Enter your password" required>
                 </div>
                 <a href="#" class="forgot-password" style="text-align: right; width: 100%; display: block;">Forgot password?</a>
-                <button class="next-btn" onclick="alert('Sign in functionality coming soon!')">next</button>
+                <button class="next-btn" onclick="alert('Sign in functionality coming soon!')">Sign In</button>
             </form>
         </div>
-        <a class="continue-link" onclick="showPage('authPage')">continue without an account</a>
+        <a class="continue-link" onclick="showPage('authPage')">Continue without an account</a>
+    </div>
+
+    <!-- Voice Assistant Page -->
+    <div class="page" id="voiceAssistantPage">
+        <div class="voice-assistant-container">
+            <h2 class="voice-title">Voice Assistant</h2>
+            <div class="voice-canvas-wrapper">
+                <canvas id="voiceCanvas"></canvas>
+            </div>
+            <div class="voice-controls">
+                <button class="voice-btn" id="startVoiceBtn" onclick="toggleVoiceRecognition()">Start Listening</button>
+                <button class="voice-btn" onclick="showPage('homePage')">Back</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -537,6 +968,193 @@
             
             // Show selected page
             document.getElementById(pageId).classList.add('active');
+            
+            // Initialize voice canvas if voice assistant page is shown
+            if (pageId === 'voiceAssistantPage') {
+                initVoiceCanvas();
+            }
+        }
+
+        // Voice Assistant Canvas
+        let voiceCanvas, voiceCtx;
+        let isListening = false;
+        let animationFrameId;
+        let waveData = [];
+        let time = 0;
+
+        function initVoiceCanvas() {
+            voiceCanvas = document.getElementById('voiceCanvas');
+            if (!voiceCanvas) return;
+            
+            voiceCtx = voiceCanvas.getContext('2d');
+            
+            // Set canvas size
+            function resizeCanvas() {
+                const rect = voiceCanvas.getBoundingClientRect();
+                voiceCanvas.width = rect.width;
+                voiceCanvas.height = rect.height;
+            }
+            
+            resizeCanvas();
+            
+            // Handle window resize
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Initialize wave data
+            const numBars = 50;
+            waveData = [];
+            for (let i = 0; i < numBars; i++) {
+                waveData.push({
+                    amplitude: Math.random() * 0.5 + 0.2,
+                    frequency: Math.random() * 0.02 + 0.01,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+            
+            // Start animation
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            animateVoiceCanvas();
+        }
+
+        function animateVoiceCanvas() {
+            if (!voiceCanvas || !voiceCtx) return;
+            
+            const width = voiceCanvas.width;
+            const height = voiceCanvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Clear canvas
+            voiceCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            voiceCtx.fillRect(0, 0, width, height);
+            
+            // Draw gradient background
+            const gradient = voiceCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(width, height) / 2);
+            gradient.addColorStop(0, 'rgba(140, 10, 34, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(139, 0, 0, 0.2)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+            voiceCtx.fillStyle = gradient;
+            voiceCtx.fillRect(0, 0, width, height);
+            
+            // Draw microphone icon in center
+            drawMicrophone(centerX, centerY, isListening ? 80 : 60);
+            
+            // Draw sound waves
+            if (isListening) {
+                drawSoundWaves(centerX, centerY, width, height);
+            }
+            
+            time += 0.05;
+            animationFrameId = requestAnimationFrame(animateVoiceCanvas);
+        }
+
+        function drawMicrophone(x, y, size) {
+            voiceCtx.save();
+            
+            // Microphone body
+            const bodyWidth = size * 0.4;
+            const bodyHeight = size * 0.6;
+            const bodyX = x - bodyWidth / 2;
+            const bodyY = y - bodyHeight / 2;
+            
+            // Outer glow
+            const glowGradient = voiceCtx.createRadialGradient(x, y, 0, x, y, size);
+            glowGradient.addColorStop(0, isListening ? 'rgba(140, 10, 34, 0.8)' : 'rgba(140, 10, 34, 0.4)');
+            glowGradient.addColorStop(1, 'rgba(140, 10, 34, 0)');
+            voiceCtx.fillStyle = glowGradient;
+            voiceCtx.beginPath();
+            voiceCtx.arc(x, y, size, 0, Math.PI * 2);
+            voiceCtx.fill();
+            
+            // Microphone circle
+            voiceCtx.strokeStyle = isListening ? '#ffffff' : 'rgba(255, 255, 255, 0.8)';
+            voiceCtx.lineWidth = 4;
+            voiceCtx.beginPath();
+            voiceCtx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+            voiceCtx.stroke();
+            
+            // Microphone body (rectangle)
+            voiceCtx.fillStyle = isListening ? '#ffffff' : 'rgba(255, 255, 255, 0.9)';
+            voiceCtx.fillRect(bodyX, bodyY, bodyWidth, bodyHeight);
+            
+            // Microphone stand
+            const standWidth = size * 0.15;
+            const standHeight = size * 0.3;
+            voiceCtx.fillRect(x - standWidth / 2, y + bodyHeight / 2, standWidth, standHeight);
+            
+            // Microphone base
+            const baseWidth = size * 0.6;
+            const baseHeight = size * 0.1;
+            voiceCtx.fillRect(x - baseWidth / 2, y + bodyHeight / 2 + standHeight, baseWidth, baseHeight);
+            
+            voiceCtx.restore();
+        }
+
+        function drawSoundWaves(centerX, centerY, width, height) {
+            voiceCtx.save();
+            
+            const numWaves = 3;
+            const maxRadius = Math.min(width, height) / 2 - 50;
+            
+            for (let wave = 0; wave < numWaves; wave++) {
+                const radius = 60 + wave * 40 + Math.sin(time + wave) * 10;
+                const opacity = 0.6 - wave * 0.15;
+                
+                // Create gradient for wave
+                const waveGradient = voiceCtx.createRadialGradient(centerX, centerY, radius - 20, centerX, centerY, radius + 20);
+                waveGradient.addColorStop(0, `rgba(140, 10, 34, ${opacity})`);
+                waveGradient.addColorStop(0.5, `rgba(255, 20, 60, ${opacity * 0.7})`);
+                waveGradient.addColorStop(1, `rgba(139, 0, 0, ${opacity * 0.3})`);
+                
+                voiceCtx.strokeStyle = waveGradient;
+                voiceCtx.lineWidth = 3;
+                voiceCtx.beginPath();
+                voiceCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                voiceCtx.stroke();
+            }
+            
+            // Draw animated bars around microphone
+            const numBars = 36;
+            const barRadius = 100;
+            const barLength = 30 + Math.sin(time * 2) * 20;
+            
+            for (let i = 0; i < numBars; i++) {
+                const angle = (i / numBars) * Math.PI * 2;
+                const barX = centerX + Math.cos(angle) * barRadius;
+                const barY = centerY + Math.sin(angle) * barRadius;
+                
+                const dynamicLength = barLength + Math.sin(time * 3 + i * 0.5) * 15;
+                const endX = centerX + Math.cos(angle) * (barRadius + dynamicLength);
+                const endY = centerY + Math.sin(angle) * (barRadius + dynamicLength);
+                
+                const barGradient = voiceCtx.createLinearGradient(barX, barY, endX, endY);
+                barGradient.addColorStop(0, `rgba(255, 255, 255, ${0.8 - i * 0.02})`);
+                barGradient.addColorStop(1, `rgba(140, 10, 34, ${0.6 - i * 0.01})`);
+                
+                voiceCtx.strokeStyle = barGradient;
+                voiceCtx.lineWidth = 3;
+                voiceCtx.beginPath();
+                voiceCtx.moveTo(barX, barY);
+                voiceCtx.lineTo(endX, endY);
+                voiceCtx.stroke();
+            }
+            
+            voiceCtx.restore();
+        }
+
+        function toggleVoiceRecognition() {
+            isListening = !isListening;
+            const btn = document.getElementById('startVoiceBtn');
+            
+            if (isListening) {
+                btn.textContent = 'Stop Listening';
+                btn.classList.add('active');
+            } else {
+                btn.textContent = 'Start Listening';
+                btn.classList.remove('active');
+            }
         }
         
         // Create stars when page loads
