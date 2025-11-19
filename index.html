@@ -7,759 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-red: #8c0a22;
-            --primary-red-dark: #6a0819;
-            --primary-red-light: #a50d2d;
-            --accent-red: #ff1a4d;
-            --text-white: #ffffff;
-            --text-gray: rgba(255, 255, 255, 0.7);
-            --text-gray-light: rgba(255, 255, 255, 0.5);
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
-            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
-            --shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.4);
-        }
-
-        body {
-            height: 100vh;
-            background: linear-gradient(135deg, #000000 0%, #1a0a0f 20%, #8c0a22 50%, #1a0a0f 80%, #000000 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            color: var(--text-white);
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .stars {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-            overflow: hidden;
-        }
-
-        .star {
-            position: absolute;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 70%, transparent 100%);
-            border-radius: 50%;
-            animation: twinkle 3s ease-in-out infinite;
-            box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
-        }
-
-        .star:nth-child(odd) {
-            animation-delay: 0.5s;
-        }
-
-        .star:nth-child(3n) {
-            animation-delay: 1s;
-        }
-
-        .star:nth-child(5n) {
-            animation-delay: 1.5s;
-        }
-
-        .star:nth-child(7n) {
-            animation-delay: 2s;
-        }
-
-        @keyframes twinkle {
-            0%, 100% {
-                opacity: 0.2;
-                transform: scale(0.8);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-        }
-
-        .page {
-            display: none;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-        }
-
-        .page.active {
-            display: flex;
-            flex-direction: column;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 24px 48px;
-            backdrop-filter: blur(20px);
-            background: rgba(140, 10, 34, 0.15);
-            border-bottom: 1px solid rgba(140, 10, 34, 0.3);
-            position: relative;
-            z-index: 10;
-        }
-
-        .login-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--text-white);
-            color: var(--primary-red);
-            border: none;
-            padding: 12px 28px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-md);
-            letter-spacing: -0.3px;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            background: #f8f8f8;
-        }
-
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .icon-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .icon-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: rgba(140, 10, 34, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(140, 10, 34, 0.4);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: var(--text-white);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .icon-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s;
-        }
-
-        .icon-btn:hover {
-            transform: translateY(-2px);
-            background: rgba(140, 10, 34, 0.4);
-            border-color: rgba(140, 10, 34, 0.6);
-            box-shadow: 0 4px 16px rgba(140, 10, 34, 0.4);
-        }
-
-        .icon-btn:hover::before {
-            width: 100px;
-            height: 100px;
-        }
-
-        .icon-btn:active {
-            transform: translateY(0);
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 32px;
-            color: var(--text-white);
-            text-align: center;
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .main-title {
-            font-size: clamp(3rem, 8vw, 7rem);
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--text-white) 0%, rgba(255, 255, 255, 0.8) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.05em;
-            line-height: 1.1;
-            margin-bottom: 8px;
-            animation: fadeInUp 0.8s ease;
-        }
-
-        .subtitle {
-            font-size: clamp(1.25rem, 2.5vw, 2rem);
-            font-weight: 400;
-            color: var(--text-gray);
-            letter-spacing: -0.02em;
-            animation: fadeInUp 0.8s ease 0.2s both;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .start-btn {
-            background: var(--text-white);
-            color: var(--primary-red);
-            border: none;
-            padding: 18px 48px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-top: 16px;
-            box-shadow: var(--shadow-lg);
-            letter-spacing: -0.3px;
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.8s ease 0.4s both;
-        }
-
-        .start-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(140, 10, 34, 0.1);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .start-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .start-btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .start-btn:active {
-            transform: translateY(-1px);
-        }
-
-        .features-section {
-            margin-top: 80px;
-            text-align: center;
-            animation: fadeInUp 0.8s ease 0.6s both;
-        }
-
-        .features-title {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-gray);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .scroll-indicator {
-            width: 56px;
-            height: 56px;
-            border: 2px solid rgba(140, 10, 34, 0.5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 16px auto 0;
-            cursor: pointer;
-            animation: bounce 2s infinite;
-            background: rgba(140, 10, 34, 0.2);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .scroll-indicator:hover {
-            border-color: rgba(140, 10, 34, 0.8);
-            background: rgba(140, 10, 34, 0.35);
-            transform: translateY(-5px);
-            box-shadow: 0 4px 16px rgba(140, 10, 34, 0.4);
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        .arrow-down {
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 12px solid var(--text-white);
-            opacity: 0.8;
-        }
-
-        /* Features Page */
-        .features-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            padding: 48px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .features-page-title {
-            font-size: clamp(2rem, 4vw, 3.5rem);
-            font-weight: 700;
-            color: var(--text-white);
-            text-align: center;
-            margin-bottom: 64px;
-            letter-spacing: -0.03em;
-            background: linear-gradient(135deg, var(--text-white) 0%, var(--text-gray) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 24px;
-            color: var(--text-white);
-            padding: 32px;
-            background: rgba(140, 10, 34, 0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(140, 10, 34, 0.3);
-            border-radius: 20px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-red), var(--accent-red));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .feature-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(140, 10, 34, 0.5);
-            border-color: rgba(140, 10, 34, 0.6);
-            background: rgba(140, 10, 34, 0.25);
-        }
-
-        .feature-item:hover::before {
-            transform: scaleX(1);
-        }
-
-        .feature-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            flex-shrink: 0;
-            box-shadow: var(--shadow-md);
-            transition: transform 0.3s ease;
-        }
-
-        .feature-item:hover .feature-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .feature-text {
-            font-size: 1.125rem;
-            font-weight: 400;
-            text-align: left;
-            line-height: 1.6;
-            color: var(--text-white);
-            flex: 1;
-        }
-
-        /* Auth Pages */
-        .auth-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--text-white);
-            gap: 48px;
-            padding: 40px;
-        }
-
-        .user-icon-large {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            box-shadow: var(--shadow-xl);
-            position: relative;
-        }
-
-        .user-icon-large::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
-            opacity: 0.3;
-            filter: blur(20px);
-            z-index: -1;
-        }
-
-        .auth-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            margin-top: -8px;
-            letter-spacing: -0.03em;
-        }
-
-        .auth-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
-            max-width: 320px;
-        }
-
-        .auth-btn {
-            background: rgba(140, 10, 34, 0.2);
-            backdrop-filter: blur(20px);
-            color: var(--text-white);
-            border: 1px solid rgba(140, 10, 34, 0.4);
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 100%;
-            letter-spacing: -0.3px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .auth-btn:hover {
-            background: var(--text-white);
-            color: var(--primary-red);
-            border-color: var(--text-white);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .auth-btn:hover::before {
-            left: 100%;
-        }
-
-        .auth-btn:active {
-            transform: translateY(0);
-        }
-
-        .continue-link {
-            position: absolute;
-            bottom: 32px;
-            right: 48px;
-            color: var(--text-gray);
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            padding: 8px 16px;
-            border-radius: 8px;
-        }
-
-        .continue-link:hover {
-            color: var(--text-white);
-            background: rgba(140, 10, 34, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        /* Form Pages */
-        .form-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--text-white);
-            gap: 40px;
-            padding: 40px;
-        }
-
-        .form-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            width: 100%;
-            max-width: 440px;
-            background: rgba(140, 10, 34, 0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(140, 10, 34, 0.3);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 16px 64px rgba(140, 10, 34, 0.3);
-        }
-
-        .form-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-gray);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 18px;
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-white);
-            transition: all 0.3s ease;
-        }
-
-        .form-input::placeholder {
-            color: var(--text-gray-light);
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary-red);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 3px rgba(140, 10, 34, 0.2);
-        }
-
-        .next-btn {
-            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
-            color: var(--text-white);
-            border: none;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-md);
-            letter-spacing: -0.3px;
-            width: 100%;
-        }
-
-        .next-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            background: linear-gradient(135deg, var(--primary-red-light), var(--accent-red));
-        }
-
-        .next-btn:active {
-            transform: translateY(0);
-        }
-
-        .forgot-password {
-            color: var(--text-gray);
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-align: right;
-            margin-top: -8px;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .forgot-password:hover {
-            color: var(--text-white);
-            text-decoration: underline;
-        }
-
-        /* Voice Assistant Canvas Page */
-        .voice-assistant-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            width: 100%;
-            position: relative;
-            padding: 40px;
-        }
-
-        .voice-canvas-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 900px;
-            height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(140, 10, 34, 0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(140, 10, 34, 0.4);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 16px 64px rgba(140, 10, 34, 0.4);
-        }
-
-        #voiceCanvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 16px;
-        }
-
-        .voice-title {
-            font-size: clamp(1.75rem, 3vw, 2.5rem);
-            font-weight: 700;
-            color: var(--text-white);
-            margin-bottom: 32px;
-            text-align: center;
-            letter-spacing: -0.03em;
-            background: linear-gradient(135deg, var(--text-white) 0%, var(--text-gray) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .voice-controls {
-            margin-top: 32px;
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .voice-btn {
-            background: rgba(140, 10, 34, 0.25);
-            backdrop-filter: blur(20px);
-            color: var(--text-white);
-            border: 1px solid rgba(140, 10, 34, 0.5);
-            padding: 14px 36px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            letter-spacing: -0.3px;
-            box-shadow: 0 4px 16px rgba(140, 10, 34, 0.3);
-        }
-
-        .voice-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(140, 10, 34, 0.5);
-            background: rgba(140, 10, 34, 0.4);
-            border-color: rgba(140, 10, 34, 0.7);
-        }
-
-        .voice-btn.active {
-            background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
-            color: var(--text-white);
-            border-color: transparent;
-            animation: pulse 2s infinite;
-            box-shadow: var(--shadow-lg);
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(140, 10, 34, 0.7), var(--shadow-lg);
-            }
-            50% {
-                box-shadow: 0 0 0 12px rgba(140, 10, 34, 0), var(--shadow-lg);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
     <div class="stars" id="stars"></div>
 
-    <!-- Home Page -->
+   
     <div class="page active" id="homePage">
         <div class="navbar">
             <button class="login-btn" onclick="showPage('authPage')">
@@ -814,7 +67,7 @@
         </div>
     </div>
 
-    <!-- Features Page -->
+    
     <div class="page" id="featuresPage">
         <div class="main-content">
             <h2 class="features-page-title">Voice Recognition Assistant Features</h2>
@@ -840,7 +93,7 @@
         <a class="continue-link" onclick="showPage('homePage')">← Back</a>
     </div>
 
-    <!-- Auth Selection Page -->
+    
     <div class="page" id="authPage">
         <div class="auth-container">
             <div class="user-icon-large">
@@ -858,7 +111,7 @@
         <a class="continue-link" onclick="showPage('homePage')">Continue without an account</a>
     </div>
 
-    <!-- Sign Up Page -->
+
     <div class="page" id="signUpPage">
         <div class="form-container">
             <div class="user-icon-large">
@@ -893,7 +146,7 @@
         <a class="continue-link" onclick="showPage('authPage')">Continue without making an account</a>
     </div>
 
-    <!-- Sign In Page -->
+   
     <div class="page" id="signInPage">
         <div class="form-container">
             <div class="user-icon-large">
@@ -919,12 +172,15 @@
         <a class="continue-link" onclick="showPage('authPage')">Continue without an account</a>
     </div>
 
-    <!-- Voice Assistant Page -->
+    
     <div class="page" id="voiceAssistantPage">
         <div class="voice-assistant-container">
             <h2 class="voice-title">Voice Assistant</h2>
             <div class="voice-canvas-wrapper">
                 <canvas id="voiceCanvas"></canvas>
+            </div>
+            <div class="voice-status" id="voiceStatus" style="margin-top: 16px; color: var(--text-gray); font-size: 0.95rem; text-align: center; min-height: 24px;">
+                Ready to capture audio...
             </div>
             <div class="voice-controls">
                 <button class="voice-btn" id="startVoiceBtn" onclick="toggleVoiceRecognition()">Start Listening</button>
@@ -959,8 +215,26 @@
             }
         }
 
-        // Page navigation
+        // this  is page navigation
         function showPage(pageId) {
+            // Cleanup voice assistant when leaving the page
+            const currentPage = document.querySelector('.page.active');
+            if (currentPage && currentPage.id === 'voiceAssistantPage' && pageId !== 'voiceAssistantPage') {
+                if (isListening) {
+                    isListening = false;
+                    stopMicrophoneCapture();
+                    const btn = document.getElementById('startVoiceBtn');
+                    if (btn) {
+                        btn.textContent = 'Start Listening';
+                        btn.classList.remove('active');
+                    }
+                }
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            }
+            
             // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
@@ -975,12 +249,29 @@
             }
         }
 
-        // Voice Assistant Canvas
+        // 
+        //
+        // Flow:
+        // 1. getUserMedia() -> Get microphone access
+        // 2. MediaStreamSource -> Connect microphone to Web Audio API
+        // 3. AnalyserNode -> Perform FFT analysis on audio data
+        // 4. getByteFrequencyData() -> Get frequency data (0-255 per frequency bin)
+        // 5. Canvas visualization -> Draw real-time audio visualization
+        // ========================================================================
+        
+        // Canvas and animation variables
         let voiceCanvas, voiceCtx;
         let isListening = false;
         let animationFrameId;
-        let waveData = [];
         let time = 0;
+        
+        // Web Audio API variables
+        let audioContext;
+        let analyser;
+        let microphone;
+        let dataArray;
+        let bufferLength;
+        let mediaStream;
 
         function initVoiceCanvas() {
             voiceCanvas = document.getElementById('voiceCanvas');
@@ -1000,22 +291,91 @@
             // Handle window resize
             window.addEventListener('resize', resizeCanvas);
             
-            // Initialize wave data
-            const numBars = 50;
-            waveData = [];
-            for (let i = 0; i < numBars; i++) {
-                waveData.push({
-                    amplitude: Math.random() * 0.5 + 0.2,
-                    frequency: Math.random() * 0.02 + 0.01,
-                    phase: Math.random() * Math.PI * 2
-                });
-            }
-            
             // Start animation
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
             }
             animateVoiceCanvas();
+        }
+
+        async function startMicrophoneCapture() {
+            try {
+                // Request microphone access
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    } 
+                });
+                
+                // Create Audio Context
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create analyser node for FFT analysis
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 512; // FFT size (power of 2)
+                analyser.smoothingTimeConstant = 0.8; // Smoothing for visualization
+                
+                // Connect microphone to analyser
+                microphone = audioContext.createMediaStreamSource(mediaStream);
+                microphone.connect(analyser);
+                
+                // Get frequency data array size
+                bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                // Update status
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '✅ Microphone connected successfully!';
+                    statusEl.style.color = '#4ade80';
+                }
+                
+                console.log('Microphone capture started successfully');
+                return true;
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                
+                // Update status
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '❌ Microphone access denied. Please check permissions.';
+                    statusEl.style.color = '#ef4444';
+                }
+                
+                alert('Could not access microphone. Please check permissions.');
+                return false;
+            }
+        }
+
+        function stopMicrophoneCapture() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            
+            if (microphone) {
+                microphone.disconnect();
+                microphone = null;
+            }
+            
+            if (audioContext) {
+                audioContext.close();
+                audioContext = null;
+            }
+            
+            analyser = null;
+            dataArray = null;
+            
+            // Update status
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.textContent = 'Microphone stopped. Ready to capture audio...';
+                statusEl.style.color = 'var(--text-gray)';
+            }
+            
+            console.log('Microphone capture stopped');
         }
 
         function animateVoiceCanvas() {
@@ -1038,12 +398,37 @@
             voiceCtx.fillStyle = gradient;
             voiceCtx.fillRect(0, 0, width, height);
             
-            // Draw microphone icon in center
-            drawMicrophone(centerX, centerY, isListening ? 80 : 60);
+            // Get audio data from FFT if listening
+            let audioData = null;
+            let averageVolume = 0;
             
-            // Draw sound waves
-            if (isListening) {
-                drawSoundWaves(centerX, centerY, width, height);
+            if (isListening && analyser && dataArray) {
+                // Get frequency data (FFT result)
+                analyser.getByteFrequencyData(dataArray);
+                audioData = Array.from(dataArray);
+                
+                // Calculate average volume
+                const sum = audioData.reduce((a, b) => a + b, 0);
+                averageVolume = sum / audioData.length;
+                
+                // Update status display
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    const volumePercent = Math.round((averageVolume / 255) * 100);
+                    const maxFreq = Math.max(...audioData);
+                    const statusColor = volumePercent > 50 ? 'var(--accent-red)' : 'var(--text-white)';
+                    statusEl.style.color = statusColor;
+                    statusEl.textContent = `🎤 Listening... | Volume: ${volumePercent}% | Max Frequency: ${maxFreq}`;
+                }
+            }
+            
+            // Draw microphone icon in center with dynamic size based on volume
+            const micSize = isListening ? 80 + (averageVolume / 255) * 40 : 60;
+            drawMicrophone(centerX, centerY, micSize);
+            
+            // Draw sound waves with real audio data
+            if (isListening && audioData) {
+                drawRealTimeSoundWaves(centerX, centerY, width, height, audioData, averageVolume);
             }
             
             time += 0.05;
@@ -1092,21 +477,58 @@
             voiceCtx.restore();
         }
 
-        function drawSoundWaves(centerX, centerY, width, height) {
+        function drawRealTimeSoundWaves(centerX, centerY, width, height, audioData, averageVolume) {
             voiceCtx.save();
             
-            const numWaves = 3;
-            const maxRadius = Math.min(width, height) / 2 - 50;
+            // Draw circular frequency bars based on FFT data
+            const numBars = Math.min(audioData.length, 128); // Limit to 128 bars for performance
+            const barRadius = 120;
+            const maxBarLength = 100;
             
-            for (let wave = 0; wave < numWaves; wave++) {
-                const radius = 60 + wave * 40 + Math.sin(time + wave) * 10;
-                const opacity = 0.6 - wave * 0.15;
+            for (let i = 0; i < numBars; i++) {
+                const angle = (i / numBars) * Math.PI * 2;
+                const barX = centerX + Math.cos(angle) * barRadius;
+                const barY = centerY + Math.sin(angle) * barRadius;
                 
-                // Create gradient for wave
-                const waveGradient = voiceCtx.createRadialGradient(centerX, centerY, radius - 20, centerX, centerY, radius + 20);
-                waveGradient.addColorStop(0, `rgba(140, 10, 34, ${opacity})`);
-                waveGradient.addColorStop(0.5, `rgba(255, 20, 60, ${opacity * 0.7})`);
-                waveGradient.addColorStop(1, `rgba(139, 0, 0, ${opacity * 0.3})`);
+               
+                const amplitude = audioData[i] / 255;
+                const barLength = amplitude * maxBarLength;
+                
+                const endX = centerX + Math.cos(angle) * (barRadius + barLength);
+                const endY = centerY + Math.sin(angle) * (barRadius + barLength);
+                
+                
+                const hue = 340; // this is Red hue
+                const saturation = 80 + amplitude * 20;
+                const lightness = 40 + amplitude * 40;
+                
+                const barGradient = voiceCtx.createLinearGradient(barX, barY, endX, endY);
+                barGradient.addColorStop(0, `hsla(${hue}, ${saturation}%, ${lightness}%, 0.8)`);
+                barGradient.addColorStop(1, `hsla(${hue}, ${saturation}%, ${lightness + 20}%, 0.3)`);
+                
+                voiceCtx.strokeStyle = barGradient;
+                voiceCtx.lineWidth = 4;
+                voiceCtx.lineCap = 'round';
+                voiceCtx.beginPath();
+                voiceCtx.moveTo(barX, barY);
+                voiceCtx.lineTo(endX, endY);
+                voiceCtx.stroke();
+            }
+          
+            const numWaves = 3;
+            for (let wave = 0; wave < numWaves; wave++) {
+                const baseRadius = 150 + wave * 50;
+                const volumeEffect = (averageVolume / 255) * 30;
+                const radius = baseRadius + volumeEffect + Math.sin(time * 2 + wave) * 10;
+                const opacity = (0.4 - wave * 0.1) * (averageVolume / 255);
+                
+                const waveGradient = voiceCtx.createRadialGradient(
+                    centerX, centerY, radius - 10,
+                    centerX, centerY, radius + 10
+                );
+                waveGradient.addColorStop(0, `rgba(255, 26, 77, ${opacity})`);
+                waveGradient.addColorStop(0.5, `rgba(140, 10, 34, ${opacity * 0.7})`);
+                waveGradient.addColorStop(1, `rgba(140, 10, 34, 0)`);
                 
                 voiceCtx.strokeStyle = waveGradient;
                 voiceCtx.lineWidth = 3;
@@ -1115,43 +537,67 @@
                 voiceCtx.stroke();
             }
             
-            // Draw animated bars around microphone
-            const numBars = 36;
-            const barRadius = 100;
-            const barLength = 30 + Math.sin(time * 2) * 20;
+            // Draw frequency spectrum as waveform
+            voiceCtx.beginPath();
+            voiceCtx.lineWidth = 3;
+            voiceCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
             
-            for (let i = 0; i < numBars; i++) {
-                const angle = (i / numBars) * Math.PI * 2;
-                const barX = centerX + Math.cos(angle) * barRadius;
-                const barY = centerY + Math.sin(angle) * barRadius;
+            const waveformRadius = 80;
+            const samplesPerSegment = Math.floor(audioData.length / 64);
+            
+            for (let i = 0; i < 64; i++) {
+                const angle = (i / 64) * Math.PI * 2;
                 
-                const dynamicLength = barLength + Math.sin(time * 3 + i * 0.5) * 15;
-                const endX = centerX + Math.cos(angle) * (barRadius + dynamicLength);
-                const endY = centerY + Math.sin(angle) * (barRadius + dynamicLength);
+               
+                let sum = 0;
+                for (let j = 0; j < samplesPerSegment; j++) {
+                    const index = i * samplesPerSegment + j;
+                    if (index < audioData.length) {
+                        sum += audioData[index];
+                    }
+                }
+                const avgAmplitude = (sum / samplesPerSegment) / 255;
                 
-                const barGradient = voiceCtx.createLinearGradient(barX, barY, endX, endY);
-                barGradient.addColorStop(0, `rgba(255, 255, 255, ${0.8 - i * 0.02})`);
-                barGradient.addColorStop(1, `rgba(140, 10, 34, ${0.6 - i * 0.01})`);
+                const radius = waveformRadius + avgAmplitude * 40;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
                 
-                voiceCtx.strokeStyle = barGradient;
-                voiceCtx.lineWidth = 3;
-                voiceCtx.beginPath();
-                voiceCtx.moveTo(barX, barY);
-                voiceCtx.lineTo(endX, endY);
-                voiceCtx.stroke();
+                if (i === 0) {
+                    voiceCtx.moveTo(x, y);
+                } else {
+                    voiceCtx.lineTo(x, y);
+                }
             }
+            
+            voiceCtx.closePath();
+            voiceCtx.stroke();
             
             voiceCtx.restore();
         }
 
-        function toggleVoiceRecognition() {
-            isListening = !isListening;
+        async function toggleVoiceRecognition() {
             const btn = document.getElementById('startVoiceBtn');
             
-            if (isListening) {
-                btn.textContent = 'Stop Listening';
-                btn.classList.add('active');
+            if (!isListening) {
+                // Start listening
+                btn.disabled = true;
+                btn.textContent = 'Initializing...';
+                
+                const success = await startMicrophoneCapture();
+                
+                if (success) {
+                    isListening = true;
+                    btn.textContent = 'Stop Listening';
+                    btn.classList.add('active');
+                } else {
+                    btn.textContent = 'Start Listening';
+                }
+                
+                btn.disabled = false;
             } else {
+                // Stop listening
+                isListening = false;
+                stopMicrophoneCapture();
                 btn.textContent = 'Start Listening';
                 btn.classList.remove('active');
             }
