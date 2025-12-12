@@ -186,6 +186,12 @@
                 <button class="voice-btn" id="startVoiceBtn" onclick="toggleVoiceRecognition()">Start Listening</button>
                 <button class="voice-btn" onclick="showPage('homePage')">Back</button>
             </div>
+            <div class="volume-control" id="volumeControl">
+                <label for="volumeSlider">
+                    Input Volume: <span id="volumeValue">100%</span>
+                </label>
+                <input type="range" id="volumeSlider" min="0" max="200" value="100">
+            </div>
         </div>
     </div>
 
@@ -269,9 +275,20 @@
         let audioContext;
         let analyser;
         let microphone;
+        let gainNode;
         let dataArray;
+        let timeDataArray;
         let bufferLength;
         let mediaStream;
+        
+        // Speech Recognition variables
+        let recognition;
+        let isRecognizing = false;
+        
+        // Music playback variables
+        let audioBuffer;
+        let audioSource;
+        let isMusicPlaying = false;
 
         function initVoiceCanvas() {
             voiceCanvas = document.getElementById('voiceCanvas');
@@ -317,18 +334,30 @@
                 analyser.fftSize = 512; // FFT size (power of 2)
                 analyser.smoothingTimeConstant = 0.8; // Smoothing for visualization
                 
-                // Connect microphone to analyser
+                // Create gain node for volume control
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 1.0; // Default volume (100%)
+                
+                // Connect microphone to gain node, then to analyser
                 microphone = audioContext.createMediaStreamSource(mediaStream);
-                microphone.connect(analyser);
+                microphone.connect(gainNode);
+                gainNode.connect(analyser);
                 
                 // Get frequency data array size
                 bufferLength = analyser.frequencyBinCount;
                 dataArray = new Uint8Array(bufferLength);
+                timeDataArray = new Uint8Array(bufferLength);
+                
+                // Setup volume slider
+                setupVolumeControl();
+                
+                // Start speech recognition
+                startSpeechRecognition();
                 
                 // Update status
                 const statusEl = document.getElementById('voiceStatus');
                 if (statusEl) {
-                    statusEl.textContent = '✅ Microphone connected successfully!';
+                    statusEl.textContent = '✅ Microphone connected! Say "Play music" to start...';
                     statusEl.style.color = '#4ade80';
                 }
                 
@@ -360,6 +389,11 @@
                 microphone = null;
             }
             
+            if (gainNode) {
+                gainNode.disconnect();
+                gainNode = null;
+            }
+            
             if (audioContext) {
                 audioContext.close();
                 audioContext = null;
@@ -367,6 +401,19 @@
             
             analyser = null;
             dataArray = null;
+            timeDataArray = null;
+            
+            // Stop speech recognition
+            stopSpeechRecognition();
+            
+            // Stop music if playing
+            stopMusic();
+            
+            // Hide volume control
+            const volumeControl = document.getElementById('volumeControl');
+            if (volumeControl) {
+                volumeControl.style.display = 'none';
+            }
             
             // Update status
             const statusEl = document.getElementById('voiceStatus');
@@ -402,10 +449,13 @@
             let audioData = null;
             let averageVolume = 0;
             
-            if (isListening && analyser && dataArray) {
+            if (isListening && analyser && dataArray && timeDataArray) {
                 // Get frequency data (FFT result)
                 analyser.getByteFrequencyData(dataArray);
                 audioData = Array.from(dataArray);
+                
+                // Get time domain data (waveform)
+                analyser.getByteTimeDomainData(timeDataArray);
                 
                 // Calculate average volume
                 const sum = audioData.reduce((a, b) => a + b, 0);
@@ -429,6 +479,10 @@
             // Draw sound waves with real audio data
             if (isListening && audioData) {
                 drawRealTimeSoundWaves(centerX, centerY, width, height, audioData, averageVolume);
+                // Draw time domain waveform at the bottom
+                if (timeDataArray) {
+                    drawTimeDomainWaveform(centerX, centerY, width, height, timeDataArray);
+                }
             }
             
             time += 0.05;
@@ -575,6 +629,379 @@
             voiceCtx.restore();
         }
 
+        function drawTimeDomainWaveform(centerX, centerY, width, height, timeData) {
+            voiceCtx.save();
+            
+            // Draw waveform at the bottom of canvas
+            const waveformY = height - 80;
+            const waveformHeight = 60;
+            const sliceWidth = width / bufferLength;
+            
+            voiceCtx.strokeStyle = 'rgba(255, 26, 77, 0.8)';
+            voiceCtx.lineWidth = 2;
+            voiceCtx.beginPath();
+            
+            let x = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                const v = timeData[i] / 128.0;
+                const y = waveformY + (v * waveformHeight / 2);
+                
+                if (i === 0) {
+                    voiceCtx.moveTo(x, y);
+                } else {
+                    voiceCtx.lineTo(x, y);
+                }
+                
+                x += sliceWidth;
+            }
+            
+            voiceCtx.stroke();
+            
+            // Draw center line
+            voiceCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            voiceCtx.lineWidth = 1;
+            voiceCtx.beginPath();
+            voiceCtx.moveTo(0, waveformY);
+            voiceCtx.lineTo(width, waveformY);
+            voiceCtx.stroke();
+            
+            voiceCtx.restore();
+        }
+
+        function setupVolumeControl() {
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const volumeControl = document.getElementById('volumeControl');
+            
+            if (volumeSlider && volumeValue && volumeControl && gainNode) {
+                volumeControl.style.display = 'flex';
+                
+                volumeSlider.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    const gainValue = value / 100; // Convert 0-200 to 0.0-2.0
+                    gainNode.gain.value = gainValue;
+                    volumeValue.textContent = Math.round(value) + '%';
+                });
+            }
+        }
+
+        function playConfirmationBeep(type = 'success') {
+            if (!audioContext) return;
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                // Different frequencies for different types
+                if (type === 'success') {
+                    oscillator.frequency.value = 440; // A4 note
+                    oscillator.type = 'sine';
+                } else if (type === 'error') {
+                    oscillator.frequency.value = 220; // A3 note (lower)
+                    oscillator.type = 'sawtooth';
+                } else if (type === 'start') {
+                    oscillator.frequency.value = 523.25; // C5 note
+                    oscillator.type = 'sine';
+                }
+                
+                // Envelope for smooth sound
+                const now = audioContext.currentTime;
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.3, now + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                
+                oscillator.start(now);
+                oscillator.stop(now + 0.15);
+            } catch (error) {
+                console.error('Error playing beep:', error);
+            }
+        }
+
+        function startSpeechRecognition() {
+            // Check if browser supports Speech Recognition
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                console.warn('Speech Recognition not supported in this browser');
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '⚠️ Speech recognition not supported. Use Chrome/Edge for best experience.';
+                    statusEl.style.color = '#fbbf24';
+                }
+                return;
+            }
+            
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = () => {
+                isRecognizing = true;
+                console.log('Speech recognition started');
+            };
+            
+            recognition.onresult = (event) => {
+                const lastResult = event.results[event.results.length - 1];
+                const transcript = lastResult[0].transcript.trim().toLowerCase();
+                
+                console.log('Recognized:', transcript);
+                
+                // Update status with recognized command
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = `🎤 Heard: "${transcript}"`;
+                    statusEl.style.color = '#60a5fa';
+                }
+                
+                // Process commands
+                processVoiceCommand(transcript);
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'no-speech') {
+                    // This is normal, just means no speech detected yet
+                    return;
+                }
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl && event.error !== 'no-speech') {
+                    statusEl.textContent = `⚠️ Recognition error: ${event.error}`;
+                    statusEl.style.color = '#fbbf24';
+                }
+            };
+            
+            recognition.onend = () => {
+                isRecognizing = false;
+                // Restart recognition if still listening
+                if (isListening) {
+                    try {
+                        recognition.start();
+                    } catch (error) {
+                        console.error('Error restarting recognition:', error);
+                    }
+                }
+            };
+            
+            try {
+                recognition.start();
+            } catch (error) {
+                console.error('Error starting speech recognition:', error);
+            }
+        }
+        
+        function stopSpeechRecognition() {
+            if (recognition && isRecognizing) {
+                try {
+                    recognition.stop();
+                    isRecognizing = false;
+                } catch (error) {
+                    console.error('Error stopping speech recognition:', error);
+                }
+            }
+        }
+        
+        function processVoiceCommand(command) {
+            // Normalize command - remove extra spaces and convert to lowercase
+            const normalizedCommand = command.toLowerCase().trim();
+            
+            // Check for "play music" command
+            if (normalizedCommand.includes('play music') || normalizedCommand.includes('play song')) {
+                playMusic();
+                return;
+            }
+            
+            // Check for "stop music" command
+            if (normalizedCommand.includes('stop music') || normalizedCommand.includes('stop song') || normalizedCommand.includes('pause music')) {
+                stopMusic();
+                return;
+            }
+            
+            // Check for "change background" command
+            if (normalizedCommand.includes('change background') || normalizedCommand.includes('change the background')) {
+                changeBackgroundToBlue();
+                return;
+            }
+            
+            // You can add more commands here in the future
+            // For now, show that command was not recognized
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.textContent = `❓ Command not recognized. Try "Play music" or "Change background"`;
+                statusEl.style.color = '#fbbf24';
+            }
+        }
+        
+        function changeBackgroundToBlue() {
+            try {
+                // Change body background to blue
+                const body = document.body;
+                body.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%)';
+                body.style.backgroundSize = '400% 400%';
+                body.style.animation = 'gradientShift 15s ease infinite';
+                
+                // Update status
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '🎨 Background changed to blue!';
+                    statusEl.style.color = '#60a5fa';
+                }
+                
+                // Play confirmation beep
+                playConfirmationBeep('success');
+                
+                console.log('Background changed to blue');
+            } catch (error) {
+                console.error('Error changing background:', error);
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '❌ Error changing background.';
+                    statusEl.style.color = '#ef4444';
+                }
+                playConfirmationBeep('error');
+            }
+        }
+        
+        async function loadAudioFile(url) {
+            try {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                return audioBuffer;
+            } catch (error) {
+                console.error('Error loading audio file:', error);
+                throw error;
+            }
+        }
+        
+        async function playMusic() {
+            if (isMusicPlaying) {
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '🎵 Music is already playing!';
+                    statusEl.style.color = '#60a5fa';
+                }
+                return;
+            }
+            
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            try {
+                // Update status
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '🎵 Loading music...';
+                    statusEl.style.color = '#60a5fa';
+                }
+                
+                // ============================================================
+                // TO USE YOUR OWN AUDIO FILE:
+                // Replace the audioUrl below with your audio file path
+                // Examples:
+                // - Local file: 'audio/mysong.mp3'
+                // - Online URL: 'https://example.com/mysong.mp3'
+                // Supported formats: MP3, WAV, OGG, etc.
+                // ============================================================
+                const audioUrl = 'SoundHelix-Song-2.mp3';
+                
+                // Try to load the audio file
+                try {
+                    audioBuffer = await loadAudioFile(audioUrl);
+                } catch (error) {
+                    // If loading from URL fails, create a simple tone as fallback
+                    console.warn('Could not load audio file, using generated tone instead');
+                    audioBuffer = generateTone(audioContext, 440, 2); // A4 note for 2 seconds
+                }
+                
+                // Create audio source
+                audioSource = audioContext.createBufferSource();
+                audioSource.buffer = audioBuffer;
+                
+                // Create gain node for music volume
+                const musicGain = audioContext.createGain();
+                musicGain.gain.value = 0.5; // 50% volume
+                
+                // Connect and play
+                audioSource.connect(musicGain);
+                musicGain.connect(audioContext.destination);
+                
+                audioSource.onended = () => {
+                    isMusicPlaying = false;
+                    audioSource = null;
+                    const statusEl = document.getElementById('voiceStatus');
+                    if (statusEl) {
+                        statusEl.textContent = '🎵 Music finished. Say "Play music" to play again.';
+                        statusEl.style.color = '#60a5fa';
+                    }
+                };
+                
+                audioSource.start(0);
+                isMusicPlaying = true;
+                
+                // Update status
+                if (statusEl) {
+                    statusEl.textContent = '🎵 Music playing! Say "Stop music" to stop.';
+                    statusEl.style.color = '#4ade80';
+                }
+                
+                // Play confirmation beep
+                playConfirmationBeep('success');
+                
+            } catch (error) {
+                console.error('Error playing music:', error);
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '❌ Error playing music. Please try again.';
+                    statusEl.style.color = '#ef4444';
+                }
+                playConfirmationBeep('error');
+            }
+        }
+        
+        function stopMusic() {
+            if (audioSource && isMusicPlaying) {
+                try {
+                    audioSource.stop();
+                    audioSource = null;
+                    isMusicPlaying = false;
+                    
+                    const statusEl = document.getElementById('voiceStatus');
+                    if (statusEl) {
+                        statusEl.textContent = '⏹️ Music stopped. Say "Play music" to play again.';
+                        statusEl.style.color = '#60a5fa';
+                    }
+                    
+                    playConfirmationBeep('success');
+                } catch (error) {
+                    console.error('Error stopping music:', error);
+                }
+            } else {
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '⏹️ No music is currently playing.';
+                    statusEl.style.color = '#fbbf24';
+                }
+            }
+        }
+        
+        function generateTone(audioContext, frequency, duration) {
+            const sampleRate = audioContext.sampleRate;
+            const frameCount = sampleRate * duration;
+            const buffer = audioContext.createBuffer(1, frameCount, sampleRate);
+            const channelData = buffer.getChannelData(0);
+            
+            for (let i = 0; i < frameCount; i++) {
+                channelData[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
+            }
+            
+            return buffer;
+        }
+
         async function toggleVoiceRecognition() {
             const btn = document.getElementById('startVoiceBtn');
             
@@ -589,8 +1016,12 @@
                     isListening = true;
                     btn.textContent = 'Stop Listening';
                     btn.classList.add('active');
+                    // Play start confirmation beep
+                    playConfirmationBeep('start');
                 } else {
                     btn.textContent = 'Start Listening';
+                    // Play error beep
+                    playConfirmationBeep('error');
                 }
                 
                 btn.disabled = false;
@@ -600,6 +1031,8 @@
                 stopMicrophoneCapture();
                 btn.textContent = 'Start Listening';
                 btn.classList.remove('active');
+                // Play stop confirmation beep
+                playConfirmationBeep('success');
             }
         }
         
