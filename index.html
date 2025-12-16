@@ -286,9 +286,14 @@
         let isRecognizing = false;
         
         // Music playback variables
-        let audioBuffer;
         let audioSource;
+        let musicAudioElement;
         let isMusicPlaying = false;
+        
+        // Clown music variables
+        let clownAudioSource;
+        let clownAudioElement;
+        let isClownPlaying = false;
 
         function initVoiceCanvas() {
             voiceCanvas = document.getElementById('voiceCanvas');
@@ -408,6 +413,7 @@
             
             // Stop music if playing
             stopMusic();
+            stopClownMusic();
             
             // Hide volume control
             const volumeControl = document.getElementById('volumeControl');
@@ -826,11 +832,17 @@
                 return;
             }
             
+            // Check for "bring clown" command
+            if (normalizedCommand.includes('bring clown') || normalizedCommand.includes('bring the clown')) {
+                bringClown();
+                return;
+            }
+            
             // You can add more commands here in the future
             // For now, show that command was not recognized
             const statusEl = document.getElementById('voiceStatus');
             if (statusEl) {
-                statusEl.textContent = `❓ Command not recognized. Try "Play music" or "Change background"`;
+                statusEl.textContent = `❓ Command not recognized. Try "Play music", "Stop music", "Change background", or "Bring clown"`;
                 statusEl.style.color = '#fbbf24';
             }
         }
@@ -865,19 +877,11 @@
             }
         }
         
-        async function loadAudioFile(url) {
-            try {
-                const response = await fetch(url);
-                const arrayBuffer = await response.arrayBuffer();
-                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                return audioBuffer;
-            } catch (error) {
-                console.error('Error loading audio file:', error);
-                throw error;
-            }
-        }
-        
         async function playMusic() {
+            // Stop any currently playing music
+            stopMusic();
+            stopClownMusic();
+            
             if (isMusicPlaying) {
                 const statusEl = document.getElementById('voiceStatus');
                 if (statusEl) {
@@ -899,40 +903,38 @@
                     statusEl.style.color = '#60a5fa';
                 }
                 
-                // ============================================================
-                // TO USE YOUR OWN AUDIO FILE:
-                // Replace the audioUrl below with your audio file path
-                // Examples:
-                // - Local file: 'audio/mysong.mp3'
-                // - Online URL: 'https://example.com/mysong.mp3'
-                // Supported formats: MP3, WAV, OGG, etc.
-                // ============================================================
-                const audioUrl = 'SoundHelix-Song-2.mp3';
+                // Use CORS-enabled audio URL (GitHub raw files work well)
+                // Replace with your own CORS-enabled audio URL
+                const audioUrl = 'https://raw.githubusercontent.com/mdn/webaudio-examples/main/audio-analyser/viper.mp3';
                 
-                // Try to load the audio file
-                try {
-                    audioBuffer = await loadAudioFile(audioUrl);
-                } catch (error) {
-                    // If loading from URL fails, create a simple tone as fallback
-                    console.warn('Could not load audio file, using generated tone instead');
-                    audioBuffer = generateTone(audioContext, 440, 2); // A4 note for 2 seconds
-                }
+                // Create HTML Audio element (handles CORS better)
+                musicAudioElement = new Audio(audioUrl);
+                musicAudioElement.crossOrigin = 'anonymous';
+                musicAudioElement.volume = 0.5; // 50% volume
                 
-                // Create audio source
-                audioSource = audioContext.createBufferSource();
-                audioSource.buffer = audioBuffer;
+                // Wait for audio to load
+                await new Promise((resolve, reject) => {
+                    musicAudioElement.oncanplaythrough = resolve;
+                    musicAudioElement.onerror = reject;
+                    musicAudioElement.load();
+                });
                 
-                // Create gain node for music volume
+                // Create MediaElementAudioSourceNode (still Web Audio API!)
+                audioSource = audioContext.createMediaElementSource(musicAudioElement);
+                
+                // Create gain node for music volume control
                 const musicGain = audioContext.createGain();
                 musicGain.gain.value = 0.5; // 50% volume
                 
-                // Connect and play
+                // Connect: audioSource -> gain -> speakers (Web Audio API graph)
                 audioSource.connect(musicGain);
                 musicGain.connect(audioContext.destination);
                 
-                audioSource.onended = () => {
+                // Handle when music ends
+                musicAudioElement.onended = () => {
                     isMusicPlaying = false;
                     audioSource = null;
+                    musicAudioElement = null;
                     const statusEl = document.getElementById('voiceStatus');
                     if (statusEl) {
                         statusEl.textContent = '🎵 Music finished. Say "Play music" to play again.';
@@ -940,7 +942,8 @@
                     }
                 };
                 
-                audioSource.start(0);
+                // Play the audio
+                await musicAudioElement.play();
                 isMusicPlaying = true;
                 
                 // Update status
@@ -960,13 +963,16 @@
                     statusEl.style.color = '#ef4444';
                 }
                 playConfirmationBeep('error');
+                musicAudioElement = null;
             }
         }
         
         function stopMusic() {
-            if (audioSource && isMusicPlaying) {
+            if (musicAudioElement && isMusicPlaying) {
                 try {
-                    audioSource.stop();
+                    musicAudioElement.pause();
+                    musicAudioElement.currentTime = 0;
+                    musicAudioElement = null;
                     audioSource = null;
                     isMusicPlaying = false;
                     
@@ -980,26 +986,124 @@
                 } catch (error) {
                     console.error('Error stopping music:', error);
                 }
-            } else {
-                const statusEl = document.getElementById('voiceStatus');
-                if (statusEl) {
-                    statusEl.textContent = '⏹️ No music is currently playing.';
-                    statusEl.style.color = '#fbbf24';
-                }
             }
         }
         
-        function generateTone(audioContext, frequency, duration) {
-            const sampleRate = audioContext.sampleRate;
-            const frameCount = sampleRate * duration;
-            const buffer = audioContext.createBuffer(1, frameCount, sampleRate);
-            const channelData = buffer.getChannelData(0);
+        async function bringClown() {
+            // Stop any currently playing music
+            stopMusic();
+            stopClownMusic();
             
-            for (let i = 0; i < frameCount; i++) {
-                channelData[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
+            if (isClownPlaying) {
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Clown is already here!';
+                    statusEl.style.color = '#fbbf24';
+                    statusEl.style.fontSize = '1.2rem';
+                }
+                return;
             }
             
-            return buffer;
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            try {
+                // Update status with clown emojis
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Loading clown music...';
+                    statusEl.style.color = '#fbbf24';
+                    statusEl.style.fontSize = '1.2rem';
+                }
+                
+                // ============================================================
+                // TO USE YOUR BABY WALTZ SONG:
+                // 1. Upload "Baby_Waltz_Samsung_Galaxy_S21_Stock_Fun-640755-mobiles24 (1).mp3" 
+                //    to GitHub (create a repo, upload the file)
+                // 2. Click the file → Click "Raw" button
+                // 3. Copy the URL and replace the audioUrl below
+                // Example: 'https://raw.githubusercontent.com/yourusername/repo/main/filename.mp3'
+                // ============================================================
+                // For now, using a placeholder CORS-enabled URL
+                // Replace this with your uploaded file URL:
+                const audioUrl = 'https://raw.githubusercontent.com/mdn/webaudio-examples/main/audio-analyser/viper.mp3';
+                
+                // Create HTML Audio element (handles CORS better - same as Play Music)
+                clownAudioElement = new Audio(audioUrl);
+                clownAudioElement.crossOrigin = 'anonymous';
+                clownAudioElement.volume = 0.5; // 50% volume
+                
+                // Wait for audio to load
+                await new Promise((resolve, reject) => {
+                    clownAudioElement.oncanplaythrough = resolve;
+                    clownAudioElement.onerror = reject;
+                    clownAudioElement.load();
+                });
+                
+                // Create MediaElementAudioSourceNode (still Web Audio API!)
+                clownAudioSource = audioContext.createMediaElementSource(clownAudioElement);
+                
+                // Create gain node for music volume control
+                const musicGain = audioContext.createGain();
+                musicGain.gain.value = 0.5; // 50% volume
+                
+                // Connect: audioSource -> gain -> speakers (Web Audio API graph)
+                clownAudioSource.connect(musicGain);
+                musicGain.connect(audioContext.destination);
+                
+                // Handle when music ends
+                clownAudioElement.onended = () => {
+                    isClownPlaying = false;
+                    clownAudioSource = null;
+                    clownAudioElement = null;
+                    const statusEl = document.getElementById('voiceStatus');
+                    if (statusEl) {
+                        statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Clown music finished!';
+                        statusEl.style.color = '#fbbf24';
+                        statusEl.style.fontSize = '1.2rem';
+                    }
+                };
+                
+                // Play the audio
+                await clownAudioElement.play();
+                isClownPlaying = true;
+                
+                // Update status
+                if (statusEl) {
+                    statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Clown music playing!';
+                    statusEl.style.color = '#fbbf24';
+                    statusEl.style.fontSize = '1.2rem';
+                }
+                
+                // Play confirmation beep
+                playConfirmationBeep('success');
+                
+            } catch (error) {
+                console.error('Error playing clown music:', error);
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 ❌ Error: Upload your file to GitHub and replace the URL';
+                    statusEl.style.color = '#ef4444';
+                    statusEl.style.fontSize = '1.2rem';
+                }
+                playConfirmationBeep('error');
+                clownAudioElement = null;
+            }
+        }
+        
+        function stopClownMusic() {
+            if (clownAudioElement && isClownPlaying) {
+                try {
+                    clownAudioElement.pause();
+                    clownAudioElement.currentTime = 0;
+                    clownAudioElement = null;
+                    clownAudioSource = null;
+                    isClownPlaying = false;
+                } catch (error) {
+                    console.error('Error stopping clown music:', error);
+                }
+            }
         }
 
         async function toggleVoiceRecognition() {
