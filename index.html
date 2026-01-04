@@ -905,11 +905,17 @@
                 return;
             }
             
+            // Check for "take photo" command
+            if (normalizedCommand.includes('take photo') || normalizedCommand.includes('take picture') || normalizedCommand.includes('capture')) {
+                takePhoto();
+                return;
+            }
+            
             // You can add more commands here in the future
             // For now, show that command was not recognized
             const statusEl = document.getElementById('voiceStatus');
             if (statusEl) {
-                statusEl.textContent = `❓ Try: "Play music", "Play video", "Open camera", "Bring clown"`;
+                statusEl.textContent = `❓ Try: "Play music", "Play video", "Open camera", "Take photo"`;
                 statusEl.style.color = '#fbbf24';
             }
         }
@@ -1584,7 +1590,7 @@
                 
                 // Create hint
                 const hint = document.createElement('p');
-                hint.textContent = 'Say "Close camera" to exit';
+                hint.textContent = 'Say "Take picture" or "Close camera" to exit';
                 hint.style.cssText = `
                     margin-top: 10px;
                     font-size: 0.85rem;
@@ -1651,6 +1657,57 @@
                 
                 playConfirmationBeep('success');
                 console.log('Camera closed');
+            }
+        }
+        
+        function takePhoto() {
+            const statusEl = document.getElementById('voiceStatus');
+            
+            if (!cameraVideoElement || !isCameraOpen) {
+                if (statusEl) {
+                    statusEl.textContent = '📷 Open camera first! Say "Open camera"';
+                    statusEl.style.color = '#fbbf24';
+                }
+                return;
+            }
+            
+            try {
+                // Create canvas to capture frame
+                const canvas = document.createElement('canvas');
+                canvas.width = cameraVideoElement.videoWidth;
+                canvas.height = cameraVideoElement.videoHeight;
+                
+                // Draw current video frame onto canvas (flip to match mirror view)
+                const ctx = canvas.getContext('2d');
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1); // Mirror the image
+                ctx.drawImage(cameraVideoElement, 0, 0);
+                
+                // Convert canvas to image URL
+                const imageDataUrl = canvas.toDataURL('image/png');
+                
+                // Create download link
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                link.download = `photo-${timestamp}.png`;
+                link.href = imageDataUrl;
+                link.click();
+                
+                if (statusEl) {
+                    statusEl.textContent = '📸 Photo saved! Check your downloads.';
+                    statusEl.style.color = '#4ade80';
+                }
+                
+                playConfirmationBeep('success');
+                console.log('Photo captured and downloaded');
+                
+            } catch (error) {
+                console.error('Error taking photo:', error);
+                if (statusEl) {
+                    statusEl.textContent = '📸 ❌ Error taking photo.';
+                    statusEl.style.color = '#ef4444';
+                }
+                playConfirmationBeep('error');
             }
         }
 
