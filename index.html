@@ -851,11 +851,35 @@
                 return;
             }
             
+            // Check for "volume up" command
+            if (normalizedCommand.includes('volume up') || normalizedCommand.includes('turn up') || normalizedCommand.includes('louder')) {
+                adjustVolume(0.1);
+                return;
+            }
+            
+            // Check for "volume down" command
+            if (normalizedCommand.includes('volume down') || normalizedCommand.includes('turn down') || normalizedCommand.includes('quieter') || normalizedCommand.includes('lower')) {
+                adjustVolume(-0.1);
+                return;
+            }
+            
+            // Check for "mute" command
+            if (normalizedCommand.includes('mute') && !normalizedCommand.includes('unmute')) {
+                setMute(true);
+                return;
+            }
+            
+            // Check for "unmute" command
+            if (normalizedCommand.includes('unmute')) {
+                setMute(false);
+                return;
+            }
+            
             // You can add more commands here in the future
             // For now, show that command was not recognized
             const statusEl = document.getElementById('voiceStatus');
             if (statusEl) {
-                statusEl.textContent = `❓ Try: "Play music", "Stop music", "Change background", "Bring clown", or "Stop clown"`;
+                statusEl.textContent = `❓ Try: "Play music", "Volume up/down", "Mute/Unmute", "Bring clown"`;
                 statusEl.style.color = '#fbbf24';
             }
         }
@@ -1113,6 +1137,77 @@
                     console.error('Error stopping clown music:', error);
                 }
             }
+        }
+        
+        function adjustVolume(change) {
+            // Get the currently playing audio element
+            let currentAudio = null;
+            if (isMusicPlaying && musicAudioElement) {
+                currentAudio = musicAudioElement;
+            } else if (isClownPlaying && clownAudioElement) {
+                currentAudio = clownAudioElement;
+            }
+            
+            const statusEl = document.getElementById('voiceStatus');
+            
+            if (!currentAudio) {
+                if (statusEl) {
+                    statusEl.textContent = '🔇 No music is playing to adjust volume.';
+                    statusEl.style.color = '#fbbf24';
+                }
+                return;
+            }
+            
+            // Adjust volume (clamp between 0 and 1)
+            let newVolume = currentAudio.volume + change;
+            newVolume = Math.max(0, Math.min(1, newVolume)); // Clamp to 0-1 range
+            currentAudio.volume = newVolume;
+            
+            const volumePercent = Math.round(newVolume * 100);
+            const volumeIcon = change > 0 ? '🔊' : '🔉';
+            
+            if (statusEl) {
+                statusEl.textContent = `${volumeIcon} Volume: ${volumePercent}%`;
+                statusEl.style.color = '#4ade80';
+            }
+            
+            playConfirmationBeep('success');
+            console.log(`Volume adjusted to ${volumePercent}%`);
+        }
+        
+        function setMute(muted) {
+            // Get the currently playing audio element
+            let currentAudio = null;
+            if (isMusicPlaying && musicAudioElement) {
+                currentAudio = musicAudioElement;
+            } else if (isClownPlaying && clownAudioElement) {
+                currentAudio = clownAudioElement;
+            }
+            
+            const statusEl = document.getElementById('voiceStatus');
+            
+            if (!currentAudio) {
+                if (statusEl) {
+                    statusEl.textContent = '🔇 No music is playing to mute/unmute.';
+                    statusEl.style.color = '#fbbf24';
+                }
+                return;
+            }
+            
+            currentAudio.muted = muted;
+            
+            if (statusEl) {
+                if (muted) {
+                    statusEl.textContent = '🔇 Music muted!';
+                    statusEl.style.color = '#60a5fa';
+                } else {
+                    statusEl.textContent = '🔊 Music unmuted!';
+                    statusEl.style.color = '#4ade80';
+                }
+            }
+            
+            playConfirmationBeep('success');
+            console.log(`Music ${muted ? 'muted' : 'unmuted'}`);
         }
         
         function showClownPopup() {
