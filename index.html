@@ -24,7 +24,7 @@
                         <line x1="8" y1="23" x2="16" y2="23"></line>
                     </svg>
                 </button>
-                <button class="icon-btn" title="Reminders">
+                <button class="icon-btn" title="Reminders" onclick="showRemindersPopup()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
@@ -209,6 +209,10 @@
         let clownAudioSource;
         let clownAudioElement;
         let isClownPlaying = false;
+        
+        // Reminder variables
+        let reminders = [];
+        let reminderIdCounter = 0;
 
         function initVoiceCanvas() {
             voiceCanvas = document.getElementById('voiceCanvas');
@@ -826,11 +830,18 @@
                 return;
             }
             
+            // Check for "set reminder" command
+            // Format: "set reminder to [message] in [number] [seconds/minutes/hours]"
+            if (normalizedCommand.includes('set reminder') || normalizedCommand.includes('remind me')) {
+                parseAndSetReminder(normalizedCommand);
+                return;
+            }
+            
             // You can add more commands here in the future
             // For now, show that command was not recognized
             const statusEl = document.getElementById('voiceStatus');
             if (statusEl) {
-                statusEl.textContent = `❓ Try: "Play music", "Play video", "Open camera", "Take photo"`;
+                statusEl.textContent = `❓ Try: "Set reminder to...", "Play music", "Open camera"`;
                 statusEl.style.color = '#fbbf24';
             }
         }
@@ -1626,6 +1637,132 @@
             }
         }
 
+        // ========================================================================
+        // REMINDER FUNCTIONS
+        // ========================================================================
+        
+        function parseAndSetReminder(command) {
+            const statusEl = document.getElementById('voiceStatus');
+            
+            // Pattern: "set reminder to X in Y seconds/minutes/hours"
+            const patterns = [
+                /(?:set reminder to|remind me to|reminder to)\s+(.+?)\s+in\s+(\d+)\s*(second|seconds|minute|minutes|hour|hours)/i,
+                /(?:set reminder|remind me)\s+(.+?)\s+in\s+(\d+)\s*(second|seconds|minute|minutes|hour|hours)/i
+            ];
+            
+            let match = null;
+            for (const pattern of patterns) {
+                match = command.match(pattern);
+                if (match) break;
+            }
+            
+            if (match) {
+                const message = match[1].trim();
+                const timeValue = parseInt(match[2]);
+                const timeUnit = match[3].toLowerCase();
+                
+                let timeInMs = 0;
+                if (timeUnit.startsWith('second')) {
+                    timeInMs = timeValue * 1000;
+                } else if (timeUnit.startsWith('minute')) {
+                    timeInMs = timeValue * 60 * 1000;
+                } else if (timeUnit.startsWith('hour')) {
+                    timeInMs = timeValue * 60 * 60 * 1000;
+                }
+                
+                if (message && timeInMs > 0) {
+                    setReminder(message, timeInMs);
+                    return;
+                }
+            }
+            
+            // If parsing failed, show help
+            if (statusEl) {
+                statusEl.textContent = '⏰ Say: "Set reminder to [task] in [number] minutes"';
+                statusEl.style.color = '#fbbf24';
+            }
+        }
+        
+        function setReminder(message, delayMs) {
+            const statusEl = document.getElementById('voiceStatus');
+            
+            // Format the delay for display
+            let timeDisplay = '';
+            if (delayMs >= 3600000) {
+                timeDisplay = `${Math.round(delayMs / 3600000)} hour(s)`;
+            } else if (delayMs >= 60000) {
+                timeDisplay = `${Math.round(delayMs / 60000)} minute(s)`;
+            } else {
+                timeDisplay = `${Math.round(delayMs / 1000)} second(s)`;
+            }
+            
+            const reminderId = ++reminderIdCounter;
+            
+            // Set the timeout to trigger reminder
+            const timeoutId = setTimeout(() => {
+                triggerReminder(reminderId, message);
+            }, delayMs);
+            
+            // Store the reminder
+            const reminder = {
+                id: reminderId,
+                message: message,
+                timeoutId: timeoutId,
+                triggered: false
+            };
+            reminders.push(reminder);
+            
+            // Update status
+            if (statusEl) {
+                statusEl.textContent = `⏰ Reminder set: "${message}" in ${timeDisplay}`;
+                statusEl.style.color = '#4ade80';
+            }
+            
+            playConfirmationBeep('success');
+        }
+        
+        function triggerReminder(reminderId, message) {
+            // Mark reminder as triggered (don't show alert immediately)
+            const reminder = reminders.find(r => r.id === reminderId);
+            if (reminder) {
+                reminder.triggered = true;
+            }
+            
+            // Update status
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.textContent = `⏰ Reminder ready: ${message}`;
+                statusEl.style.color = '#f59e0b';
+            }
+        }
+        
+        function showRemindersPopup() {
+            // Get all triggered reminders
+            const triggeredReminders = reminders.filter(r => r.triggered);
+            
+            if (triggeredReminders.length === 0) {
+                // Show active (not yet triggered) reminders
+                const activeReminders = reminders.filter(r => !r.triggered);
+                if (activeReminders.length === 0) {
+                    alert('⏰ No reminders set.');
+                    return;
+                }
+                
+                // Show active reminders
+                const activeList = activeReminders.map(r => `"${r.message}"`).join('\n');
+                alert(`⏰ Active Reminders:\n\n${activeList}`);
+                return;
+            }
+            
+            // Show triggered reminders in a popup
+            const reminderList = triggeredReminders.map(r => `• ${r.message}`).join('\n');
+            
+            // Remove triggered reminders after showing
+            reminders = reminders.filter(r => !r.triggered);
+            
+            alert(`⏰ Reminders:\n\n${reminderList}`);
+        }
+        
         async function toggleVoiceRecognition() {
             const btn = document.getElementById('startVoiceBtn');
             
