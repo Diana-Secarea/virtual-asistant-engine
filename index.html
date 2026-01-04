@@ -838,11 +838,24 @@
                 return;
             }
             
+            // Check for "stop clown" command
+            if (normalizedCommand.includes('stop clown') || normalizedCommand.includes('stop the clown')) {
+                stopClownMusic();
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '🤡 Clown music stopped! 🎪';
+                    statusEl.style.color = '#60a5fa';
+                    statusEl.style.fontSize = '1.1rem';
+                }
+                playConfirmationBeep('success');
+                return;
+            }
+            
             // You can add more commands here in the future
             // For now, show that command was not recognized
             const statusEl = document.getElementById('voiceStatus');
             if (statusEl) {
-                statusEl.textContent = `❓ Command not recognized. Try "Play music", "Stop music", "Change background", or "Bring clown"`;
+                statusEl.textContent = `❓ Try: "Play music", "Stop music", "Change background", "Bring clown", or "Stop clown"`;
                 statusEl.style.color = '#fbbf24';
             }
         }
@@ -997,9 +1010,9 @@
             if (isClownPlaying) {
                 const statusEl = document.getElementById('voiceStatus');
                 if (statusEl) {
-                    statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Clown is already here!';
+                    statusEl.textContent = '🤡 Clown is already here! 🎪';
                     statusEl.style.color = '#fbbf24';
-                    statusEl.style.fontSize = '1.2rem';
+                    statusEl.style.fontSize = '1.1rem';
                 }
                 return;
             }
@@ -1012,26 +1025,15 @@
                 // Update status with clown emojis
                 const statusEl = document.getElementById('voiceStatus');
                 if (statusEl) {
-                    statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Loading clown music...';
+                    statusEl.textContent = '🤡 Loading clown music... 🤡';
                     statusEl.style.color = '#fbbf24';
-                    statusEl.style.fontSize = '1.2rem';
+                    statusEl.style.fontSize = '1.1rem';
                 }
                 
-                // ============================================================
-                // TO USE YOUR BABY WALTZ SONG:
-                // 1. Upload "Baby_Waltz_Samsung_Galaxy_S21_Stock_Fun-640755-mobiles24 (1).mp3" 
-                //    to GitHub (create a repo, upload the file)
-                // 2. Click the file → Click "Raw" button
-                // 3. Copy the URL and replace the audioUrl below
-                // Example: 'https://raw.githubusercontent.com/yourusername/repo/main/filename.mp3'
-                // ============================================================
-                // For now, using a placeholder CORS-enabled URL
-                // Replace this with your uploaded file URL:
-                const audioUrl = 'https://raw.githubusercontent.com/mdn/webaudio-examples/main/audio-analyser/viper.mp3';
-                
-                // Create HTML Audio element (handles CORS better - same as Play Music)
-                clownAudioElement = new Audio(audioUrl);
+                // Clown music from GitHub (CORS-enabled)
+                clownAudioElement = new Audio();
                 clownAudioElement.crossOrigin = 'anonymous';
+                clownAudioElement.src = 'https://raw.githubusercontent.com/effacestudios/Royalty-Free-Music-Pack/master/THE%20CLOWN.mp3';
                 clownAudioElement.volume = 0.5; // 50% volume
                 
                 // Wait for audio to load
@@ -1057,11 +1059,13 @@
                     isClownPlaying = false;
                     clownAudioSource = null;
                     clownAudioElement = null;
+                    // Hide clown popup when music ends
+                    hideClownPopup();
                     const statusEl = document.getElementById('voiceStatus');
                     if (statusEl) {
-                        statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Clown music finished!';
+                        statusEl.textContent = '🤡 Clown music finished! 🎪';
                         statusEl.style.color = '#fbbf24';
-                        statusEl.style.fontSize = '1.2rem';
+                        statusEl.style.fontSize = '1.1rem';
                     }
                 };
                 
@@ -1069,11 +1073,14 @@
                 await clownAudioElement.play();
                 isClownPlaying = true;
                 
+                // Show clown popup
+                showClownPopup();
+                
                 // Update status
                 if (statusEl) {
-                    statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Clown music playing!';
-                    statusEl.style.color = '#fbbf24';
-                    statusEl.style.fontSize = '1.2rem';
+                    statusEl.textContent = '🤡 Clown music playing! Say "Stop clown" to stop. 🎪';
+                    statusEl.style.color = '#4ade80';
+                    statusEl.style.fontSize = '1.1rem';
                 }
                 
                 // Play confirmation beep
@@ -1083,9 +1090,9 @@
                 console.error('Error playing clown music:', error);
                 const statusEl = document.getElementById('voiceStatus');
                 if (statusEl) {
-                    statusEl.textContent = '🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 ❌ Error: Upload your file to GitHub and replace the URL';
+                    statusEl.textContent = '🤡 ❌ Error loading clown music. Please try again.';
                     statusEl.style.color = '#ef4444';
-                    statusEl.style.fontSize = '1.2rem';
+                    statusEl.style.fontSize = '1.1rem';
                 }
                 playConfirmationBeep('error');
                 clownAudioElement = null;
@@ -1100,9 +1107,89 @@
                     clownAudioElement = null;
                     clownAudioSource = null;
                     isClownPlaying = false;
+                    // Hide clown popup
+                    hideClownPopup();
                 } catch (error) {
                     console.error('Error stopping clown music:', error);
                 }
+            }
+        }
+        
+        function showClownPopup() {
+            // Remove existing popup if any
+            hideClownPopup();
+            
+            // Create popup overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'clownPopup';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                cursor: pointer;
+            `;
+            
+            // Create image container
+            const imgContainer = document.createElement('div');
+            imgContainer.style.cssText = `
+                background: white;
+                padding: 20px;
+                border-radius: 16px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+                text-align: center;
+            `;
+            
+            // Create clown image
+            const img = document.createElement('img');
+            img.src = 'clown_image.jpg';
+            img.alt = 'Clown';
+            img.style.cssText = `
+                max-width: 300px;
+                max-height: 300px;
+                border-radius: 12px;
+            `;
+            
+            // Create text
+            const text = document.createElement('p');
+            text.textContent = '🎪 The Clown is here! 🤡';
+            text.style.cssText = `
+                margin-top: 15px;
+                font-size: 1.2rem;
+                color: #333;
+                font-weight: bold;
+            `;
+            
+            // Create close hint
+            const hint = document.createElement('p');
+            hint.textContent = 'Click anywhere to close';
+            hint.style.cssText = `
+                margin-top: 8px;
+                font-size: 0.9rem;
+                color: #666;
+            `;
+            
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(text);
+            imgContainer.appendChild(hint);
+            overlay.appendChild(imgContainer);
+            
+            // Close on click
+            overlay.addEventListener('click', hideClownPopup);
+            
+            document.body.appendChild(overlay);
+        }
+        
+        function hideClownPopup() {
+            const popup = document.getElementById('clownPopup');
+            if (popup) {
+                popup.remove();
             }
         }
 
