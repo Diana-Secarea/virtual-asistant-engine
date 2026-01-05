@@ -1,6 +1,6 @@
 # Virtual Assistant Engine
 
-A modern web-based virtual assistant that responds to voice commands for setting reminders, answering questions, and playing music.
+A modern web-based virtual assistant that responds to voice commands for setting reminders and playing music.
 
 ## Features
 
@@ -9,7 +9,6 @@ A modern web-based virtual assistant that responds to voice commands for setting
 - 📊 **Canvas API Integration**: Beautiful real-time visual feedback when speaking
 - 🔊 **Audio Analysis**: Advanced audio processing with Web Audio API
 - ⏰ **Reminder System**: Set and manage reminders with voice commands
-- 🤖 **Question Answering**: Get answers to various questions
 - 🎵 **Music Player**: Play music with voice commands
 - 💎 **Modern UI**: Beautiful, responsive interface with smooth animations
 - 📱 **Mobile Friendly**: Works on desktop and mobile devices
@@ -40,11 +39,6 @@ The Voice Assistant page features a real-time audio visualization system that us
 - "Set a reminder for [time] to [task]"
 - "Remind me to [task] in [duration]"
 - "What are my reminders?"
-
-### Questions
-- "What is [topic]?"
-- "How do I [action]?"
-- "Tell me about [subject]"
 
 ### Music
 - "Play music"
@@ -147,4 +141,4 @@ Ownership of Diana Secarea and Estera Smeu. We do accept contributions but do no
 
 ## Support
 
-For support or questions, please open an issue in the repository.
+For support, please open an issue in the repository.

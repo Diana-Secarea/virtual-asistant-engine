@@ -6,6 +6,7 @@
 let audioSource;
 let musicAudioElement;
 let isMusicPlaying = false;
+let currentMusicUrl = null;
 
 // Clown music variables
 let clownAudioSource;
@@ -53,6 +54,7 @@ async function playMusic() {
         // Use CORS-enabled audio URL (GitHub raw files work well)
         // Replace with your own CORS-enabled audio URL
         const audioUrl = 'https://raw.githubusercontent.com/mdn/webaudio-examples/main/audio-analyser/viper.mp3';
+        currentMusicUrl = audioUrl;
         
         // Create HTML Audio element (handles CORS better)
         musicAudioElement = new Audio(audioUrl);
@@ -82,6 +84,7 @@ async function playMusic() {
             isMusicPlaying = false;
             audioSource = null;
             musicAudioElement = null;
+            currentMusicUrl = null;
             const statusEl = document.getElementById('voiceStatus');
             if (statusEl) {
                 statusEl.textContent = '🎵 Music finished. Say "Play music" to play again.';
@@ -119,6 +122,11 @@ async function playMusic() {
 }
 
 function stopMusic() {
+    // Stop playlist if playing
+    if (typeof stopPlaylist === 'function') {
+        stopPlaylist();
+    }
+    
     if (musicAudioElement && isMusicPlaying) {
         try {
             musicAudioElement.pause();
@@ -126,6 +134,7 @@ function stopMusic() {
             musicAudioElement = null;
             audioSource = null;
             isMusicPlaying = false;
+            currentMusicUrl = null;
             
             const statusEl = document.getElementById('voiceStatus');
             if (statusEl) {
@@ -139,6 +148,28 @@ function stopMusic() {
         } catch (error) {
             console.error('Error stopping music:', error);
         }
+    }
+}
+
+// Helper functions for playlist integration
+function getCurrentSongUrl() {
+    return currentMusicUrl;
+}
+
+function setCurrentMusicElement(element, source) {
+    // Stop previous music if playing
+    if (musicAudioElement && isMusicPlaying) {
+        try {
+            musicAudioElement.pause();
+            musicAudioElement.currentTime = 0;
+        } catch (e) {}
+    }
+    
+    musicAudioElement = element;
+    audioSource = source;
+    isMusicPlaying = true;
+    if (element && element.src) {
+        currentMusicUrl = element.src;
     }
 }
 

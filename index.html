@@ -30,14 +30,7 @@
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
                 </button>
-                <button class="icon-btn" title="Questions">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                </button>
-                <button class="icon-btn" title="Music Player">
+                <button class="icon-btn" title="Music Player" onclick="showPage('musicPlayerPage')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 18V5l12-2v13"></path>
                         <circle cx="6" cy="18" r="3"></circle>
@@ -68,10 +61,6 @@
                 <div class="feature-item">
                     <div class="feature-icon">🎙️</div>
                     <div class="feature-text">Voice Recognition - Speak commands naturally using your microphone with advanced speech-to-text technology</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">❓</div>
-                    <div class="feature-text">Intelligent Q&A - Get instant answers to various questions powered by AI</div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">⏰</div>
@@ -110,10 +99,27 @@
         </div>
     </div>
 
+    <div class="page" id="musicPlayerPage">
+        <div class="voice-assistant-container">
+            <h2 class="voice-title">Music Player</h2>
+            <div class="playlist-container" id="playlistContainer" style="margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <h3 style="color: var(--text-white); margin-bottom: 16px; font-size: 1.2rem;">Playlist</h3>
+                <div id="playlistSongs" style="min-height: 100px; max-height: 400px; overflow-y: auto;">
+                    <p style="color: var(--text-gray); text-align: center; padding: 20px;">No songs in playlist. Say "Create playlist" and "Add to playlist" to get started.</p>
+                </div>
+                <div class="playlist-controls" style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                    <button class="voice-btn" onclick="if(typeof refreshPlaylistDisplay === 'function') refreshPlaylistDisplay()">Refresh</button>
+                    <button class="voice-btn" onclick="showPage('homePage')">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/reminders.js"></script>
     <script src="js/camera.js"></script>
     <script src="js/video.js"></script>
     <script src="js/music.js"></script>
+    <script src="js/playlist.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

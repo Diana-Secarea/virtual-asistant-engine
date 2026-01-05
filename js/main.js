@@ -612,6 +612,13 @@ function processVoiceCommand(command) {
     // Normalize command - remove extra spaces and convert to lowercase
     const normalizedCommand = command.toLowerCase().trim();
     
+    // Check for playlist commands first
+    if (typeof parsePlaylistCommand === 'function') {
+        if (parsePlaylistCommand(command)) {
+            return;
+        }
+    }
+    
     // Check for "play music" command
     if (normalizedCommand.includes('play music') || normalizedCommand.includes('play song')) {
         if (typeof playMusic === 'function') {
