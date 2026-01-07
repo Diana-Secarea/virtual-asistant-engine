@@ -682,6 +682,16 @@ function processVoiceCommand(command) {
         return;
     }
     
+    // Check for "mute reminder" or "stop reminder sound" command
+    if (typeof parseMuteReminderCommand === 'function') {
+        if (parseMuteReminderCommand(command)) {
+            if (typeof playConfirmationBeep === 'function') {
+                playConfirmationBeep('success');
+            }
+            return;
+        }
+    }
+    
     // Check for "mute" command
     if (normalizedCommand.includes('mute') && !normalizedCommand.includes('unmute')) {
         setMute(true);

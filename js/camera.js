@@ -230,3 +230,7 @@ function takePhoto() {
     }
 }
 
+
+
+
+

@@ -6,6 +6,36 @@
 let reminders = [];
 let reminderIdCounter = 0;
 let remindersMuted = false;
+let reminderSoundElement = null;
+
+// Initialize reminder sound element
+function initReminderSound() {
+    if (!reminderSoundElement) {
+        reminderSoundElement = new Audio('assets/SoundHelix-Song-2.mp3');
+        reminderSoundElement.volume = 0.7; // 70% volume
+        reminderSoundElement.preload = 'auto';
+        
+        // Load the audio to avoid autoplay restrictions
+        reminderSoundElement.load();
+        
+        // Handle errors
+        reminderSoundElement.addEventListener('error', (e) => {
+            console.error('Error loading reminder sound:', e);
+        });
+        
+        console.log('Reminder sound initialized');
+    }
+}
+
+// Initialize on page load
+if (typeof window !== 'undefined') {
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initReminderSound);
+    } else {
+        initReminderSound();
+    }
+}
 
 function parseAndSetReminder(command) {
     const statusEl = document.getElementById('voiceStatus');
@@ -242,21 +272,107 @@ function playReminderSound() {
         return;
     }
     
+    // Initialize sound element if not already done
+    if (!reminderSoundElement) {
+        initReminderSound();
+    }
+    
+    if (!reminderSoundElement) {
+        console.error('Failed to initialize reminder sound element');
+        return;
+    }
+    
     try {
-        // Create audio element for reminder sound
-        const reminderSound = new Audio('assets/SoundHelix-Song-2.mp3');
-        reminderSound.volume = 0.7; // 70% volume
-        reminderSound.play().catch(error => {
-            console.error('Error playing reminder sound:', error);
-        });
+        // Check if audio is ready to play
+        if (reminderSoundElement.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+            // Reset to beginning and play
+            reminderSoundElement.currentTime = 0;
+            reminderSoundElement.volume = 0.7; // 70% volume
+            
+            const playPromise = reminderSoundElement.play();
+            
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        console.log('Reminder sound playing');
+                    })
+                    .catch(error => {
+                        console.error('Error playing reminder sound:', error);
+                        // Try to play again after a short delay (sometimes helps with autoplay restrictions)
+                        setTimeout(() => {
+                            if (reminderSoundElement) {
+                                reminderSoundElement.play().catch(err => {
+                                    console.error('Retry failed to play reminder sound:', err);
+                                });
+                            }
+                        }, 100);
+                    });
+            }
+        } else {
+            // Audio not loaded yet, wait for it to load
+            console.log('Reminder sound not ready, waiting for load...');
+            reminderSoundElement.addEventListener('canplaythrough', function playWhenReady() {
+                reminderSoundElement.removeEventListener('canplaythrough', playWhenReady);
+                reminderSoundElement.currentTime = 0;
+                reminderSoundElement.volume = 0.7;
+                reminderSoundElement.play().catch(error => {
+                    console.error('Error playing reminder sound after load:', error);
+                });
+            }, { once: true });
+            
+            // Force load if not already loading
+            if (reminderSoundElement.readyState === 0) {
+                reminderSoundElement.load();
+            }
+        }
     } catch (error) {
-        console.error('Error creating reminder sound:', error);
+        console.error('Error playing reminder sound:', error);
     }
 }
 
 function setRemindersMute(muted) {
     remindersMuted = muted;
     console.log(`Reminders ${muted ? 'muted' : 'unmuted'}`);
+}
+
+function stopReminderSound() {
+    if (reminderSoundElement) {
+        try {
+            reminderSoundElement.pause();
+            reminderSoundElement.currentTime = 0;
+            console.log('Reminder sound stopped');
+            return true;
+        } catch (error) {
+            console.error('Error stopping reminder sound:', error);
+            return false;
+        }
+    }
+    return false;
+}
+
+function parseMuteReminderCommand(command) {
+    const normalizedCommand = command.toLowerCase().trim();
+    
+    // Check for "mute reminder" or "stop reminder sound" commands
+    if (normalizedCommand.includes('mute reminder') || 
+        normalizedCommand.includes('stop reminder sound') ||
+        normalizedCommand.includes('stop reminder music') ||
+        normalizedCommand.includes('silence reminder')) {
+        const stopped = stopReminderSound();
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            if (stopped) {
+                statusEl.textContent = '🔇 Reminder sound stopped';
+                statusEl.style.color = '#60a5fa';
+            } else {
+                statusEl.textContent = 'ℹ️ No reminder sound playing';
+                statusEl.style.color = '#fbbf24';
+            }
+        }
+        return true;
+    }
+    
+    return false;
 }
 
 function showReminderTriggeredPopup(message) {
